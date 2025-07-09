@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catferrals Widget Testing</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .widget-demo {
+            border: 2px dashed #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            background: #f8f9fa;
+        }
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .test-results {
+            background: #f1f8e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .mock-product-page {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .product-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .product-price {
+            font-size: 1.25rem;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+        .product-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🎨 Catferrals Widget Testing Suite</h1>
+        <p>Test all customer-facing referral features in a controlled environment</p>
+    </header>
+
+    <!-- Mock Shopify Data -->
+    <script>
+        // Mock Shopify environment
+        window.Shopify = {
+            shop: 'cats-tests.myshopify.com',
+            checkout: {
+                order_id: 'TEST123',
+                total_price: 125.99,
+                currency: 'USD',
+                order_number: 'TEST123',
+                email: 'customer@example.com'
+            }
+        };
+        
+        window.ShopifyAnalytics = {
+            meta: {
+                product: {
+                    id: 'test-product-123'
+                }
+            }
+        };
+
+        // Mock URL with referral code
+        if (!window.location.search.includes('ref=')) {
+            const url = new URL(window.location);
+            url.searchParams.set('ref', 'TESTREF123');
+            history.replaceState({}, '', url);
+        }
+    </script>
+
+    <!-- Modern Widget Test -->
+    <div class="test-section">
+        <h2>🎯 Modern Widget Style</h2>
+        <div class="instructions">
+            <strong>Features to Test:</strong>
+            <ul>
+                <li>✅ Full-featured gradient design</li>
+                <li>✅ Referral link generation</li>
+                <li>✅ Copy to clipboard functionality</li>
+                <li>✅ Social media sharing buttons</li>
+                <li>✅ Registration prompts</li>
+            </ul>
+        </div>
+        
+        <div class="mock-product-page">
+            <div class="product-title">Test Product - Modern Widget</div>
+            <div class="product-price">$49.99</div>
+            <div class="product-description">
+                This is a test product to demonstrate the modern referral widget style.
+            </div>
+            
+            <!-- Modern Widget -->
+            <div id="modern-widget-container"></div>
+        </div>
+    </div>
+
+    <!-- Minimal Widget Test -->
+    <div class="test-section">
+        <h2>📱 Minimal Widget Style</h2>
+        <div class="instructions">
+            <strong>Features to Test:</strong>
+            <ul>
+                <li>✅ Compact design</li>
+                <li>✅ Single share button</li>
+                <li>✅ Modal popup functionality</li>
+                <li>✅ Space-efficient layout</li>
+            </ul>
+        </div>
+        
+        <div class="mock-product-page">
+            <div class="product-title">Test Product - Minimal Widget</div>
+            <div class="product-price">$29.99</div>
+            <div class="product-description">
+                This is a test product to demonstrate the minimal referral widget style.
+            </div>
+            
+            <!-- Minimal Widget -->
+            <div id="minimal-widget-container"></div>
+        </div>
+    </div>
+
+    <!-- Inline Widget Test -->
+    <div class="test-section">
+        <h2>💬 Inline Widget Style</h2>
+        <div class="instructions">
+            <strong>Features to Test:</strong>
+            <ul>
+                <li>✅ Text-based integration</li>
+                <li>✅ Subtle call-to-action</li>
+                <li>✅ Commission highlighting</li>
+                <li>✅ Natural content flow</li>
+            </ul>
+        </div>
+        
+        <div class="mock-product-page">
+            <div class="product-title">Test Product - Inline Widget</div>
+            <div class="product-price">$79.99</div>
+            <div class="product-description">
+                This is a test product to demonstrate the inline referral widget style.
+                <div id="inline-widget-container"></div>
+                The widget integrates naturally within the product description content.
+            </div>
+        </div>
+    </div>
+
+    <!-- Post-Purchase Test -->
+    <div class="test-section">
+        <h2>🎉 Post-Purchase Prompt Test</h2>
+        <div class="instructions">
+            <strong>Features to Test:</strong>
+            <ul>
+                <li>✅ Order completion detection</li>
+                <li>✅ Celebratory modal design</li>
+                <li>✅ Benefits highlighting</li>
+                <li>✅ Call-to-action buttons</li>
+            </ul>
+        </div>
+        
+        <button onclick="testPostPurchasePrompt()" style="
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+        ">
+            🛒 Simulate Order Completion
+        </button>
+        
+        <div class="test-results">
+            <strong>Expected Behavior:</strong> A celebratory modal should appear after 3 seconds, offering referral program signup with commission benefits clearly displayed.
+        </div>
+    </div>
+
+    <!-- Analytics Test -->
+    <div class="test-section">
+        <h2>📊 Event Tracking Test</h2>
+        <div class="instructions">
+            <strong>Events to Monitor:</strong>
+            <ul>
+                <li>🔍 Widget load events</li>
+                <li>📋 Copy button clicks</li>
+                <li>🔗 Social share clicks</li>
+                <li>🎯 Registration prompt views</li>
+            </ul>
+        </div>
+        
+        <div class="test-results">
+            <strong>Check Browser Console:</strong> Open browser developer tools to see event tracking logs and any errors.
+        </div>
+    </div>
+
+    <!-- Customer Portal Test -->
+    <div class="test-section">
+        <h2>🏠 Customer Portal Test</h2>
+        <div class="instructions">
+            <strong>Portal Features:</strong>
+            <ul>
+                <li>💰 Earnings dashboard</li>
+                <li>📈 Performance metrics</li>
+                <li>🔗 Referral link management</li>
+                <li>📱 Social sharing integration</li>
+            </ul>
+        </div>
+        
+        <a href="/portal?shop=cats-tests.myshopify.com&email=test@example.com" 
+           target="_blank"
+           style="
+               display: inline-block;
+               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+               color: white;
+               padding: 12px 24px;
+               border-radius: 8px;
+               text-decoration: none;
+               font-weight: 600;
+               margin: 10px 0;
+           ">
+            🚀 Open Customer Portal
+        </a>
+        
+        <div class="test-results">
+            <strong>Note:</strong> This opens the customer portal in a new tab. Test the dashboard, link copying, and social sharing features.
+        </div>
+    </div>
+
+    <!-- Load Widget Scripts -->
+    <script src="catferrals-widget.js"></script>
+    <script src="post-purchase-referral.js"></script>
+
+    <!-- Initialize Widgets -->
+    <script>
+        // Initialize widgets after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 Initializing Catferrals Widgets...');
+            
+            // Modern Widget
+            new CatferralsWidget({
+                shop: 'cats-tests.myshopify.com',
+                style: 'modern',
+                position: 'modern-widget-container',
+                productId: 'test-product-modern'
+            });
+            
+            // Minimal Widget
+            new CatferralsWidget({
+                shop: 'cats-tests.myshopify.com',
+                style: 'minimal',
+                position: 'minimal-widget-container',
+                productId: 'test-product-minimal'
+            });
+            
+            // Inline Widget
+            new CatferralsWidget({
+                shop: 'cats-tests.myshopify.com',
+                style: 'inline',
+                position: 'inline-widget-container',
+                productId: 'test-product-inline'
+            });
+            
+            console.log('✅ All widgets initialized!');
+        });
+
+        // Test post-purchase prompt
+        function testPostPurchasePrompt() {
+            console.log('🛒 Testing post-purchase prompt...');
+            
+            // Clear any existing cookie to allow re-showing
+            document.cookie = 'catferrals_pp_shown=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            
+            // Force initialization of post-purchase system
+            if (window.PostPurchaseReferral) {
+                window.catferralsPostPurchase = new PostPurchaseReferral();
+            } else {
+                console.log('⚠️ Post-purchase script not loaded');
+            }
+        }
+
+        // Enhanced console logging for debugging
+        const originalLog = console.log;
+        console.log = function(...args) {
+            if (args[0] && args[0].includes && args[0].includes('Catferrals')) {
+                args[0] = '🎨 ' + args[0];
+            }
+            originalLog.apply(console, args);
+        };
+
+        // Track widget interactions
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.catferrals-widget')) {
+                console.log('🎯 Widget interaction detected:', e.target);
+            }
+        });
+    </script>
+</body>
+</html> 

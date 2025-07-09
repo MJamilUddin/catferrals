@@ -1,0 +1,258 @@
+/* Catferrals Referral Widget Styles */
+.catferrals-referral-widget {
+  margin: 20px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.catferrals-loading {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+/* Widget container styles */
+.catferrals-widget {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.catferrals-widget:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Modern widget style */
+.catferrals-widget.modern {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px;
+  text-align: center;
+}
+
+.catferrals-widget.modern .widget-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.catferrals-widget.modern .widget-description {
+  font-size: 1rem;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+.catferrals-widget.modern .widget-benefits {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.catferrals-widget.modern .benefit-item {
+  text-align: center;
+  flex: 1;
+  min-width: 80px;
+}
+
+.catferrals-widget.modern .benefit-icon {
+  font-size: 1.5rem;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.catferrals-widget.modern .benefit-text {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+/* Minimal widget style */
+.catferrals-widget.minimal {
+  background: white;
+  border: 2px solid #e2e8f0;
+  padding: 16px;
+  text-align: center;
+  color: #2d3748;
+}
+
+.catferrals-widget.minimal .widget-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #1a202c;
+}
+
+.catferrals-widget.minimal .widget-description {
+  font-size: 0.9rem;
+  color: #4a5568;
+  margin-bottom: 16px;
+}
+
+/* Inline widget style */
+.catferrals-widget.inline {
+  background: transparent;
+  padding: 8px;
+  text-align: center;
+}
+
+.catferrals-widget.inline .widget-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px dashed #667eea;
+  transition: all 0.2s ease;
+}
+
+.catferrals-widget.inline .widget-link:hover {
+  color: #764ba2;
+  border-bottom-color: #764ba2;
+}
+
+/* Button styles */
+.catferrals-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  min-width: 120px;
+}
+
+.catferrals-btn.primary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.catferrals-btn.primary:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.catferrals-btn.secondary {
+  background: #667eea;
+  color: white;
+}
+
+.catferrals-btn.secondary:hover {
+  background: #764ba2;
+  transform: translateY(-1px);
+}
+
+/* Social share integration */
+.catferrals-social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.catferrals-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: white;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.catferrals-social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.catferrals-social-btn.facebook { background: #1877f2; }
+.catferrals-social-btn.twitter { background: #1da1f2; }
+.catferrals-social-btn.linkedin { background: #0077b5; }
+.catferrals-social-btn.whatsapp { background: #25d366; }
+.catferrals-social-btn.email { background: #ea4335; }
+
+/* Position alignment */
+.catferrals-referral-widget[data-position="left"] {
+  text-align: left;
+}
+
+.catferrals-referral-widget[data-position="center"] {
+  text-align: center;
+}
+
+.catferrals-referral-widget[data-position="right"] {
+  text-align: right;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .catferrals-widget.modern {
+    padding: 16px;
+  }
+  
+  .catferrals-widget.modern .widget-title {
+    font-size: 1.2rem;
+  }
+  
+  .catferrals-widget.modern .widget-benefits {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .catferrals-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+  
+  .catferrals-social-buttons {
+    gap: 8px;
+  }
+  
+  .catferrals-social-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+}
+
+/* Animation effects */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.catferrals-widget {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Loading states */
+.catferrals-loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007ace;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+} 

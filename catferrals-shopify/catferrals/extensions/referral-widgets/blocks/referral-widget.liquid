@@ -1,0 +1,350 @@
+{% comment %}
+  Catferrals Professional Referral Widget
+  Industry-leading referral widget matching competitor standards
+  VERSION: PROFESSIONAL-v16
+{% endcomment %}
+
+<div class="catferrals-referral-widget" 
+     data-shop="{{ shop.permanent_domain }}"
+     data-style="{{ block.settings.widget_style }}"
+     data-customer-email="{{ customer.email | default: '' }}"
+     data-customer-id="{{ customer.id | default: '' }}"
+     data-product-id="{{ product.id | default: '' }}">
+  
+  <!-- Loading State -->
+  <div id="catferrals-loading" style="text-align: center; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">Loading referral program...</p>
+  </div>
+  
+  <style>
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes slideIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+    .catferrals-btn { transition: all 0.2s ease; cursor: pointer; border: none; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .catferrals-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .catferrals-input { border: 1px solid #e1e5e9; border-radius: 8px; padding: 12px 16px; font-size: 14px; transition: all 0.2s ease; }
+    .catferrals-input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+    @media (max-width: 768px) {
+      .catferrals-referral-widget { margin: 0 -10px; }
+      .catferrals-btn { font-size: 14px; padding: 10px 16px; }
+    }
+  </style>
+</div>
+
+<script>
+(function() {
+  'use strict';
+  
+  console.log('🎯 PROFESSIONAL: Referral Widget Loading - v16');
+  
+  // Only initialize once
+  if (window.catferralsReferralWidgetLoaded) return;
+  window.catferralsReferralWidgetLoaded = true;
+
+  // Professional Widget Class
+  class CatferralsReferralWidget {
+    constructor(element) {
+      this.element = element;
+      this.shop = element.dataset.shop;
+      this.style = element.dataset.style || 'modern';
+      this.customerEmail = element.dataset.customerEmail;
+      this.customerId = element.dataset.customerId;
+      this.productId = element.dataset.productId;
+      this.referralLink = this.generateReferralLink();
+      this.init();
+    }
+    
+    generateReferralLink() {
+      const baseUrl = window.location.origin;
+      const referralCode = this.customerEmail ? 
+        btoa(this.customerEmail).slice(0, 8).toUpperCase() : 
+        'SHARE' + Math.random().toString(36).substr(2, 4).toUpperCase();
+      return baseUrl + '?ref=' + referralCode;
+    }
+    
+    async copyToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        this.showNotification('Link copied to clipboard! 🎉', 'success');
+      } catch (err) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        this.showNotification('Link copied! 📋', 'success');
+      }
+    }
+    
+    showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 10000;
+        background: ${type === 'success' ? '#10b981' : '#667eea'};
+        color: white; padding: 12px 20px; border-radius: 8px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 14px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        animation: slideIn 0.3s ease;
+      `;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+    
+    shareOnPlatform(platform) {
+      const shareUrl = this.referralLink;
+      const shareText = this.getShareText();
+      
+      const shareLinks = {
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+        twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
+        whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
+        email: `mailto:?subject=${encodeURIComponent('Check this out!')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`,
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`
+      };
+      
+      if (shareLinks[platform]) {
+        window.open(shareLinks[platform], '_blank', 'width=600,height=400');
+        this.showNotification(`Shared on ${platform.charAt(0).toUpperCase() + platform.slice(1)}! 🚀`);
+      }
+    }
+    
+    getShareText() {
+      const productName = document.title.split(' | ')[0] || 'this amazing product';
+      return `I found ${productName} and thought you'd love it! Get 10% off your first order:`;
+    }
+    
+    joinProgram() {
+      // In a real implementation, this would redirect to your app
+      window.open('/apps/catferrals', '_blank');
+      this.showNotification('Redirecting to join referral program... 🎯');
+    }
+    
+    collectEmail() {
+      const email = document.getElementById('catferrals-email-input').value;
+      if (!email || !email.includes('@')) {
+        this.showNotification('Please enter a valid email address', 'error');
+        return;
+      }
+      
+      // In real implementation, save email and generate link
+      this.customerEmail = email;
+      this.referralLink = this.generateReferralLink();
+      this.render();
+      this.showNotification('Welcome to our referral program! 🎉', 'success');
+    }
+    
+    getWidgetHTML() {
+      const isCustomer = this.customerEmail && this.customerEmail.includes('@');
+      
+      if (this.style === 'modern') {
+        return this.getModernWidget(isCustomer);
+      } else if (this.style === 'minimal') {
+        return this.getMinimalWidget(isCustomer);
+      } else {
+        return this.getInlineWidget(isCustomer);
+      }
+    }
+    
+    getModernWidget(isCustomer) {
+      if (!isCustomer) {
+        return `
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 32px; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; animation: slideIn 0.5s ease;">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <h3 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700;">💝 Join Our Referral Program</h3>
+              <p style="margin: 0; opacity: 0.9; font-size: 1rem;">Give 10% off, Get 10% back on every successful referral!</p>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem;">Enter your email to get started:</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="email" id="catferrals-email-input" placeholder="your@email.com" class="catferrals-input" style="flex: 1; background: rgba(255,255,255,0.95); color: #333;">
+                <button onclick="window.catferralsWidget.collectEmail()" class="catferrals-btn" style="background: #28a745; color: white; padding: 12px 20px; white-space: nowrap;">Get My Link</button>
+              </div>
+            </div>
+            
+            <div style="text-align: center;">
+              <p style="margin: 0 0 16px 0; font-size: 0.85rem; opacity: 0.8;">🎯 Unlimited referrals • 💰 Instant rewards • 📱 Easy sharing</p>
+              <button onclick="window.catferralsWidget.joinProgram()" class="catferrals-btn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px;">Learn More</button>
+            </div>
+          </div>
+        `;
+      }
+      
+      return `
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 32px; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; animation: slideIn 0.5s ease;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h3 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700;">💝 Share & Earn Rewards</h3>
+            <p style="margin: 0; opacity: 0.9; font-size: 1rem;">Give your friends 10% off, earn 10% back on every purchase!</p>
+          </div>
+          
+          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem;">Your Personal Referral Link:</label>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <input type="text" readonly value="${this.referralLink}" class="catferrals-input" style="flex: 1; background: rgba(255,255,255,0.95); color: #333; font-size: 13px;">
+              <button onclick="window.catferralsWidget.copyToClipboard('${this.referralLink}')" class="catferrals-btn" style="background: #28a745; color: white; padding: 12px 16px;">📋 Copy</button>
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 12px; font-size: 0.9rem;">Share Instantly:</label>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px;">
+              <button onclick="window.catferralsWidget.shareOnPlatform('facebook')" class="catferrals-btn" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 10px 12px; font-size: 13px;">📘 Facebook</button>
+              <button onclick="window.catferralsWidget.shareOnPlatform('twitter')" class="catferrals-btn" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 10px 12px; font-size: 13px;">🐦 Twitter</button>
+              <button onclick="window.catferralsWidget.shareOnPlatform('whatsapp')" class="catferrals-btn" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 10px 12px; font-size: 13px;">💬 WhatsApp</button>
+              <button onclick="window.catferralsWidget.shareOnPlatform('email')" class="catferrals-btn" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 10px 12px; font-size: 13px;">📧 Email</button>
+            </div>
+          </div>
+          
+          <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 16px; text-align: center;">
+            <p style="margin: 0 0 8px 0; font-size: 0.85rem;">👥 Referrals sent: <strong>0</strong> • 💰 Rewards earned: <strong>$0</strong></p>
+            <button onclick="window.catferralsWidget.joinProgram()" class="catferrals-btn" style="background: #28a745; color: white; padding: 8px 16px; font-size: 13px;">View Dashboard</button>
+          </div>
+        </div>
+      `;
+    }
+    
+    getMinimalWidget(isCustomer) {
+      if (!isCustomer) {
+        return `
+          <div style="display: flex; align-items: center; gap: 16px; background: #f8f9fa; padding: 16px 20px; border-radius: 12px; border-left: 4px solid #667eea; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; animation: slideIn 0.5s ease;">
+            <span style="font-size: 1.5rem;">🎁</span>
+            <div style="flex: 1;">
+              <strong style="color: #333; font-size: 1rem;">Join our referral program</strong>
+              <p style="margin: 4px 0 0 0; color: #666; font-size: 0.85rem;">Give 10% off, get 10% back on every referral</p>
+            </div>
+            <button onclick="window.catferralsWidget.joinProgram()" class="catferrals-btn" style="background: #667eea; color: white; padding: 10px 20px; font-size: 14px;">Join Now</button>
+          </div>
+        `;
+      }
+      
+      return `
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #667eea; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; animation: slideIn 0.5s ease;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <span style="font-size: 1.2rem;">🔗</span>
+            <strong style="color: #333;">Share your referral link & earn rewards</strong>
+          </div>
+          <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <input type="text" readonly value="${this.referralLink}" class="catferrals-input" style="flex: 1; font-size: 13px;">
+            <button onclick="window.catferralsWidget.copyToClipboard('${this.referralLink}')" class="catferrals-btn" style="background: #667eea; color: white; padding: 8px 16px;">Copy</button>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button onclick="window.catferralsWidget.shareOnPlatform('facebook')" class="catferrals-btn" style="background: white; color: #667eea; border: 1px solid #e1e5e9; padding: 6px 12px; font-size: 12px;">📘 Share</button>
+            <button onclick="window.catferralsWidget.shareOnPlatform('twitter')" class="catferrals-btn" style="background: white; color: #667eea; border: 1px solid #e1e5e9; padding: 6px 12px; font-size: 12px;">🐦 Tweet</button>
+            <button onclick="window.catferralsWidget.shareOnPlatform('whatsapp')" class="catferrals-btn" style="background: white; color: #667eea; border: 1px solid #e1e5e9; padding: 6px 12px; font-size: 12px;">💬 Send</button>
+          </div>
+        </div>
+      `;
+    }
+    
+    getInlineWidget(isCustomer) {
+      if (!isCustomer) {
+        return `
+          <div style="background: #e8f4f8; padding: 12px 16px; border-radius: 6px; border-left: 3px solid #17a2b8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; animation: slideIn 0.5s ease;">
+            <span style="color: #17a2b8; font-weight: 600;">💰 Earn 10% on every referral</span> - 
+            Join our program and start earning rewards by sharing with friends!
+            <a href="#" onclick="window.catferralsWidget.joinProgram(); return false;" style="color: #667eea; text-decoration: none; font-weight: 600; margin-left: 8px;">Get started →</a>
+          </div>
+        `;
+      }
+      
+      return `
+        <div style="background: #e8f4f8; padding: 12px 16px; border-radius: 6px; border-left: 3px solid #17a2b8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; animation: slideIn 0.5s ease;">
+          <span style="color: #17a2b8; font-weight: 600;">💰 Your referral link:</span>
+          <code style="background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 3px; font-size: 12px; margin: 0 8px;">${this.referralLink}</code>
+          <a href="#" onclick="window.catferralsWidget.copyToClipboard('${this.referralLink}'); return false;" style="color: #667eea; text-decoration: none; font-weight: 600;">📋 Copy</a>
+        </div>
+      `;
+    }
+    
+    render() {
+      this.element.innerHTML = this.getWidgetHTML();
+    }
+    
+    init() {
+      // Remove loading state and render widget
+      setTimeout(() => {
+        this.render();
+        console.log('🎯 PROFESSIONAL: Widget rendered successfully');
+      }, 500);
+    }
+  }
+
+  // Initialize all widgets
+  function initializeAllWidgets() {
+    const widgets = document.querySelectorAll('.catferrals-referral-widget');
+    widgets.forEach(element => {
+      window.catferralsWidget = new CatferralsReferralWidget(element);
+    });
+  }
+
+  // Initialize when ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeAllWidgets);
+  } else {
+    initializeAllWidgets();
+  }
+  
+  console.log('🎯 PROFESSIONAL: Referral widget system loaded');
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Referral Widget",
+  "target": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "widget_style",
+      "label": "Widget Style",
+      "default": "modern",
+      "options": [
+        {"value": "modern", "label": "Modern (Full-featured card)"},
+        {"value": "minimal", "label": "Minimal (Compact layout)"},
+        {"value": "inline", "label": "Inline (Text link only)"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Incentive Settings"
+    },
+    {
+      "type": "text",
+      "id": "referrer_reward",
+      "label": "Referrer Reward",
+      "default": "10%",
+      "info": "What the person sharing gets"
+    },
+    {
+      "type": "text",
+      "id": "referee_reward", 
+      "label": "Referee Reward",
+      "default": "10%",
+      "info": "What the new customer gets"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Primary Color",
+      "default": "#667eea"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#28a745"
+    }
+  ]
+}
+{% endschema %}

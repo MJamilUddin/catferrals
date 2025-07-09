@@ -1,0 +1,235 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+}
+
+// Referrer Account Management
+model ReferrerAccount {
+  id                    String      @id @default(cuid())
+  shop                  String      // Shopify shop domain
+  
+  // Account Info
+  email                 String      // Primary email (unique per shop)
+  firstName             String?     // First name
+  lastName              String?     // Last name
+  phone                 String?     // Phone number
+  
+  // Shopify Integration
+  shopifyCustomerId     String?     // Link to Shopify customer
+  
+  // Account Status
+  isActive              Boolean     @default(true)
+  isEmailVerified       Boolean     @default(false)
+  emailVerificationToken String?    // For email verification
+  
+  // Preferences
+  notificationEmail     Boolean     @default(true)
+  notificationSms       Boolean     @default(false)
+  
+  // Statistics (cached for performance)
+  totalReferrals        Int         @default(0)
+  totalConversions      Int         @default(0)
+  totalCommissionEarned Float       @default(0)
+  totalCommissionPaid   Float       @default(0)
+  
+  // Timestamps
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  lastLoginAt           DateTime?
+  
+  // Relations
+  referrals             Referral[]
+  
+  @@unique([shop, email])
+  @@index([shop])
+  @@index([email])
+  @@index([shopifyCustomerId])
+}
+
+// Referral Program Management
+model ReferralProgram {
+  id                    String      @id @default(cuid())
+  shop                  String      // Shopify shop domain
+  name                  String      // Program name e.g., "Summer Referral Campaign"
+  description           String?     // Program description
+  isActive              Boolean     @default(true)
+  
+  // Commission Settings
+  commissionType        String      // "percentage" | "fixed_amount"
+  commissionValue       Float       // 10.0 for 10% or 5.00 for $5
+  minimumOrderValue     Float?      // Minimum order to qualify
+  maximumCommission     Float?      // Cap on commission amount
+  
+  // Program Limits
+  maxReferralsPerCustomer Int?      // Max referrals per customer
+  programEndDate        DateTime?   // When program expires
+  
+  // Portal Settings
+  allowSelfRegistration Boolean     @default(true)  // Can customers self-register
+  welcomeMessage        String?     // Message for new referrers
+  termsAndConditions    String?     // T&C text
+  
+  // Tracking
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  
+  // Relations
+  referrals             Referral[]
+  
+  @@index([shop])
+}
+
+// Individual Referral Instances
+model Referral {
+  id                    String            @id @default(cuid())
+  shop                  String            // Shopify shop domain
+  programId             String            // Which program this belongs to
+  referrerAccountId     String            // Link to referrer account
+  
+  // Legacy fields (for backward compatibility)
+  referrerCustomerId    String            // Shopify customer ID who refers
+  referrerEmail         String            // Referrer email
+  referrerName          String?           // Referrer name
+  
+  // Referral Details
+  referralCode          String            @unique // Unique tracking code
+  referralLink          String            // Full tracking URL
+  
+  // Referee Info (when someone uses the referral)
+  refereeCustomerId     String?           // New customer who used referral
+  refereeEmail          String?           // New customer email
+  refereeName           String?           // New customer name
+  
+  // Conversion Tracking
+  status                String            @default("pending") // "pending" | "converted" | "rewarded"
+  clickCount            Int               @default(0)
+  
+  // Order & Commission
+  orderId               String?           // Shopify order ID when converted
+  orderValue            Float?            // Order total value
+  commissionAmount      Float?            // Calculated commission
+  commissionPaid        Boolean           @default(false)
+  
+  // Timestamps
+  createdAt             DateTime          @default(now())
+  convertedAt           DateTime?         // When referral converted to sale
+  rewardedAt            DateTime?         // When commission was paid
+  lastClickedAt         DateTime?         // Last time link was clicked
+  
+  // Relations
+  program               ReferralProgram   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  referrerAccount       ReferrerAccount   @relation(fields: [referrerAccountId], references: [id], onDelete: Cascade)
+  clicks                ReferralClick[]
+  
+  @@index([shop])
+  @@index([referralCode])
+  @@index([referrerAccountId])
+  @@index([referrerCustomerId])
+  @@index([status])
+}
+
+// Track Individual Clicks for Analytics
+model ReferralClick {
+  id          String      @id @default(cuid())
+  referralId  String      // Which referral was clicked
+  
+  // Click Details
+  ipAddress   String?     // Visitor IP
+  userAgent   String?     // Browser info
+  referrer    String?     // Where they came from
+  
+  // Geolocation (optional)
+  country     String?
+  city        String?
+  
+  // Timestamp
+  clickedAt   DateTime    @default(now())
+  
+  // Relations
+  referral    Referral    @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  
+  @@index([referralId])
+  @@index([clickedAt])
+}
+
+// Store App Settings
+model AppSettings {
+  id                    String    @id @default(cuid())
+  shop                  String    @unique // One settings per shop
+  
+  // Default Program Settings
+  defaultCommissionType String    @default("percentage")
+  defaultCommissionValue Float    @default(10.0)
+  
+  // Branding
+  brandColor           String?    @default("#007ace")
+  brandLogo            String?    // URL to logo
+  
+  // Email Settings
+  senderEmail          String?
+  senderName           String?    @default("Referral Team")
+  
+  // Tracking Settings
+  trackingDomain       String?    // Custom domain for links
+  enableAnalytics      Boolean    @default(true)
+  
+  // Integration Settings
+  autoApproveReferrals Boolean    @default(true)
+  notifyOnConversion   Boolean    @default(true)
+  
+  // Timestamps
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+}
+
+// Analytics and Event Tracking
+model ReferralAnalytics {
+  id            String    @id @default(cuid())
+  shop          String    // Shopify shop domain
+  
+  // Event Details
+  eventType     String    // "widget_loaded", "referral_link_copied", "referral_shared", etc.
+  productId     String?   // Product being shared/viewed
+  referralCode  String?   // Associated referral code
+  
+  // Interaction Details
+  platform      String?   // "facebook", "twitter", "whatsapp", etc.
+  method        String?   // "copy_button", "social_button", etc.
+  
+  // Tracking
+  metadata      String?   // JSON string with additional data
+  createdAt     DateTime  @default(now())
+  
+  @@index([shop])
+  @@index([eventType])
+  @@index([referralCode])
+  @@index([createdAt])
+}

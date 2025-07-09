@@ -1,0 +1,27 @@
+name = "Catferrals Referral Widgets"
+type = "theme"
+
+[[blocks]]
+type = "referral-widget"
+name = "Referral Widget"
+target = "section"
+
+[[blocks]]
+type = "post-purchase-referral"
+name = "Post-Purchase Referral"
+target = "section"
+
+[[blocks]]
+type = "referral-social-share"
+name = "Referral Social Share"
+target = "section"
+
+[[blocks]]
+type = "referral-dashboard-page"
+name = "Referral Dashboard Page"
+target = "section"
+template = ["page"]
+
+[[snippets]]
+name = "global-referral-tracker"
+target = "head" 

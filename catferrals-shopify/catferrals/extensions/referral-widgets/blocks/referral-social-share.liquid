@@ -1,0 +1,339 @@
+{% comment %}
+  Catferrals Professional Social Share Widget
+  Modern social sharing with analytics and professional design
+  VERSION: PROFESSIONAL-v16
+{% endcomment %}
+
+<div class="catferrals-social-share-referral" 
+     data-shop="{{ shop.permanent_domain }}"
+     data-layout="{{ block.settings.layout }}"
+     data-size="{{ block.settings.button_size }}"
+     data-customer-email="{{ customer.email | default: '' }}"
+     data-product-id="{{ product.id | default: '' }}"
+     data-page-url="{{ canonical_url }}"
+     data-page-title="{{ page_title | default: shop.name }}">
+  
+  <!-- Loading State -->
+  <div id="social-loading" style="text-align: center; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">Loading social share...</p>
+  </div>
+  
+  <style>
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes socialPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes shareSuccess { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    .social-btn { 
+      transition: all 0.3s ease; cursor: pointer; border: none; border-radius: 12px; 
+      font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; 
+      justify-content: center; gap: 8px; position: relative; overflow: hidden;
+      background: white; border: 2px solid #e1e5e9; color: #374151;
+    }
+    .social-btn:hover { 
+      transform: translateY(-3px); 
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border-color: transparent;
+    }
+    .social-btn:active { animation: shareSuccess 0.3s ease; }
+    .social-btn.facebook:hover { background: #1877f2; color: white; }
+    .social-btn.twitter:hover { background: #1da1f2; color: white; }
+    .social-btn.whatsapp:hover { background: #25d366; color: white; }
+    .social-btn.linkedin:hover { background: #0077b5; color: white; }
+    .social-btn.email:hover { background: #ea4335; color: white; }
+    .social-btn.copy:hover { background: #667eea; color: white; }
+    .share-counter { 
+      background: linear-gradient(45deg, #667eea, #764ba2); 
+      color: white; border-radius: 20px; padding: 4px 8px; 
+      font-size: 11px; font-weight: 600; 
+      position: absolute; top: -8px; right: -8px;
+      animation: socialPulse 2s infinite;
+    }
+    @media (max-width: 768px) {
+      .social-share-container { margin: 0 -5px; }
+      .social-btn { font-size: 13px; padding: 10px 12px; }
+      .social-btn span:not(.share-counter) { display: none; }
+    }
+  </style>
+</div>
+
+<script>
+(function() {
+  'use strict';
+  
+  console.log('🎯 PROFESSIONAL: Social Share Widget Loading - v16');
+  
+  // Only initialize once
+  if (window.catferralsSocialShareLoaded) return;
+  window.catferralsSocialShareLoaded = true;
+
+  class CatferralsSocialShare {
+    constructor(element) {
+      this.element = element;
+      this.layout = element.dataset.layout || 'horizontal';
+      this.size = element.dataset.size || 'medium';
+      this.customerEmail = element.dataset.customerEmail;
+      this.productId = element.dataset.productId;
+      this.pageUrl = element.dataset.pageUrl || window.location.href;
+      this.pageTitle = element.dataset.pageTitle || document.title;
+      this.shareCount = 0;
+      this.referralLink = this.generateReferralLink();
+      this.init();
+    }
+    
+    generateReferralLink() {
+      const referralCode = this.customerEmail ? 
+        btoa(this.customerEmail).slice(0, 8).toUpperCase() : 
+        'SHARE' + Math.random().toString(36).substr(2, 4).toUpperCase();
+      return this.pageUrl + (this.pageUrl.includes('?') ? '&' : '?') + 'ref=' + referralCode;
+    }
+    
+    async copyToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        this.trackShare('copy');
+        this.showNotification('Link copied to clipboard! 🎉', 'success');
+      } catch (err) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        this.trackShare('copy');
+        this.showNotification('Link copied! 📋', 'success');
+      }
+    }
+    
+    showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 10000;
+        background: ${type === 'success' ? '#10b981' : '#667eea'};
+        color: white; padding: 12px 20px; border-radius: 8px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 14px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        animation: slideIn 0.3s ease;
+      `;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+    
+    trackShare(platform) {
+      this.shareCount++;
+      this.updateShareCounter();
+      
+      // Track in analytics (you would replace this with real analytics)
+      console.log(`📊 Share tracked: ${platform} - Total: ${this.shareCount}`);
+      
+      // Optional: Send to your analytics endpoint
+      // fetch('/api/track-share', { method: 'POST', body: JSON.stringify({ platform, product: this.productId }) });
+    }
+    
+    updateShareCounter() {
+      const counter = this.element.querySelector('.share-counter');
+      if (counter) {
+        counter.textContent = this.shareCount;
+        counter.style.animation = 'shareSuccess 0.5s ease';
+      }
+    }
+    
+    shareOnPlatform(platform, buttonElement) {
+      const shareUrl = this.referralLink;
+      const shareText = this.getShareText();
+      
+      // Add visual feedback
+      buttonElement.style.animation = 'shareSuccess 0.3s ease';
+      
+      const shareLinks = {
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+        twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
+        whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
+        email: `mailto:?subject=${encodeURIComponent('Check this out!')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`,
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&summary=${encodeURIComponent(shareText)}`
+      };
+      
+      if (shareLinks[platform]) {
+        window.open(shareLinks[platform], '_blank', 'width=600,height=400');
+        this.trackShare(platform);
+        this.showNotification(`Shared on ${platform.charAt(0).toUpperCase() + platform.slice(1)}! 🚀`);
+      }
+    }
+    
+    getShareText() {
+      const productName = this.pageTitle.split(' | ')[0] || 'this amazing product';
+      return `I found ${productName} and thought you'd love it! Get 10% off your first order with my referral link:`;
+    }
+    
+    getButtonSizing() {
+      const sizes = {
+        small: 'padding: 8px 12px; font-size: 12px;',
+        medium: 'padding: 12px 16px; font-size: 14px;',
+        large: 'padding: 16px 20px; font-size: 16px;'
+      };
+      return sizes[this.size] || sizes.medium;
+    }
+    
+    getLayoutStyle() {
+      const layouts = {
+        horizontal: 'display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;',
+        vertical: 'display: flex; flex-direction: column; gap: 12px; max-width: 280px; margin: 0 auto;',
+        grid: 'display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; max-width: 400px; margin: 0 auto;'
+      };
+      return layouts[this.layout] || layouts.horizontal;
+    }
+    
+    getWidgetHTML() {
+      const buttonSize = this.getButtonSizing();
+      const layoutStyle = this.getLayoutStyle();
+      
+      return `
+        <div class="share-container" style="padding: 24px; border-radius: 16px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border: 1px solid #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; animation: slideIn 0.5s ease; position: relative;">
+          
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 700; color: #1f2937;">
+              📢 Share & Earn Rewards
+              <span class="share-counter">${this.shareCount}</span>
+            </h3>
+            <p style="margin: 0; color: #6b7280; font-size: 0.9rem;">Share this product and earn 10% on every successful referral!</p>
+          </div>
+          
+          <div style="${layoutStyle}">
+            <button onclick="window.catferralsSocialShare.shareOnPlatform('facebook', this)" class="social-btn facebook" style="${buttonSize}">
+              <span style="font-size: 1.2em;">📘</span>
+              <span>Facebook</span>
+            </button>
+            
+            <button onclick="window.catferralsSocialShare.shareOnPlatform('twitter', this)" class="social-btn twitter" style="${buttonSize}">
+              <span style="font-size: 1.2em;">��</span>
+              <span>Twitter</span>
+            </button>
+            
+            <button onclick="window.catferralsSocialShare.shareOnPlatform('whatsapp', this)" class="social-btn whatsapp" style="${buttonSize}">
+              <span style="font-size: 1.2em;">💬</span>
+              <span>WhatsApp</span>
+            </button>
+            
+            <button onclick="window.catferralsSocialShare.shareOnPlatform('linkedin', this)" class="social-btn linkedin" style="${buttonSize}">
+              <span style="font-size: 1.2em;">💼</span>
+              <span>LinkedIn</span>
+            </button>
+            
+            <button onclick="window.catferralsSocialShare.shareOnPlatform('email', this)" class="social-btn email" style="${buttonSize}">
+              <span style="font-size: 1.2em;">📧</span>
+              <span>Email</span>
+            </button>
+            
+            <button onclick="window.catferralsSocialShare.copyToClipboard('${this.referralLink}')" class="social-btn copy" style="${buttonSize}">
+              <span style="font-size: 1.2em;">📋</span>
+              <span>Copy Link</span>
+            </button>
+          </div>
+          
+          <div style="margin-top: 20px; padding: 16px; background: rgba(102, 126, 234, 0.1); border-radius: 12px; text-align: center;">
+            <p style="margin: 0; font-size: 0.8rem; color: #4b5563;">
+              🎯 <strong>Your referral link:</strong> 
+              <code style="background: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; color: #667eea;">${this.referralLink.length > 50 ? this.referralLink.substring(0, 50) + '...' : this.referralLink}</code>
+            </p>
+          </div>
+        </div>
+      `;
+    }
+    
+    render() {
+      this.element.innerHTML = this.getWidgetHTML();
+    }
+    
+    init() {
+      setTimeout(() => {
+        this.render();
+        console.log('🎯 PROFESSIONAL: Social share widget rendered');
+      }, 300);
+    }
+  }
+
+  // Initialize all widgets
+  function initializeAllSocialWidgets() {
+    const widgets = document.querySelectorAll('.catferrals-social-share-referral');
+    widgets.forEach(element => {
+      window.catferralsSocialShare = new CatferralsSocialShare(element);
+    });
+  }
+
+  // Initialize when ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeAllSocialWidgets);
+  } else {
+    initializeAllSocialWidgets();
+  }
+  
+  console.log('🎯 PROFESSIONAL: Social share system loaded');
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Social Share Referral",
+  "target": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "horizontal",
+      "options": [
+        {"value": "horizontal", "label": "Horizontal (Single row)"},
+        {"value": "vertical", "label": "Vertical (Stacked)"},
+        {"value": "grid", "label": "Grid (2 columns)"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button Size",
+      "default": "medium",
+      "options": [
+        {"value": "small", "label": "Small"},
+        {"value": "medium", "label": "Medium"},
+        {"value": "large", "label": "Large"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "text",
+      "id": "widget_title",
+      "label": "Widget Title",
+      "default": "Share & Earn Rewards"
+    },
+    {
+      "type": "text",
+      "id": "share_message",
+      "label": "Share Message Template",
+      "default": "Check out this amazing product!"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Primary Color",
+      "default": "#667eea"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#f8fafc"
+    }
+  ]
+}
+{% endschema %}

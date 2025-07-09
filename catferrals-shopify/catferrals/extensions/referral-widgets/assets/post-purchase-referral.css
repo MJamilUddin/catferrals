@@ -1,0 +1,341 @@
+/* Catferrals Post-Purchase Referral Popup Styles */
+.catferrals-post-purchase-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.catferrals-post-purchase-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.catferrals-post-purchase-popup {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  padding: 32px;
+  max-width: 480px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  transform: scale(0.9) translateY(20px);
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  text-align: center;
+}
+
+.catferrals-post-purchase-overlay.active .catferrals-post-purchase-popup {
+  transform: scale(1) translateY(0);
+}
+
+.catferrals-popup-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 18px;
+  color: #666;
+}
+
+.catferrals-popup-close:hover {
+  background: rgba(0, 0, 0, 0.2);
+  transform: scale(1.1);
+}
+
+.catferrals-popup-header {
+  margin-bottom: 24px;
+}
+
+.catferrals-popup-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 24px;
+  color: white;
+  animation: bounceIn 0.6s ease-out;
+}
+
+.catferrals-popup-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 8px;
+}
+
+.catferrals-popup-subtitle {
+  font-size: 1rem;
+  color: #4a5568;
+  line-height: 1.5;
+}
+
+.catferrals-popup-commission {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin: 20px 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+  animation: pulse 2s infinite;
+}
+
+.catferrals-popup-benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.catferrals-benefit-item {
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.catferrals-benefit-icon {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.catferrals-benefit-text {
+  font-size: 0.85rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.catferrals-popup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.catferrals-popup-btn {
+  padding: 14px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.catferrals-popup-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.catferrals-popup-btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.catferrals-popup-btn.secondary {
+  background: white;
+  color: #667eea;
+  border: 1px solid #667eea;
+}
+
+.catferrals-popup-btn.secondary:hover {
+  background: #667eea;
+  color: white;
+}
+
+.catferrals-popup-btn.text {
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+}
+
+.catferrals-popup-btn.text:hover {
+  color: #374151;
+}
+
+.catferrals-popup-social {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.catferrals-popup-social-title {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.catferrals-popup-social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.catferrals-popup-social-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.catferrals-popup-social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.catferrals-popup-social-btn.facebook { background: #1877f2; }
+.catferrals-popup-social-btn.twitter { background: #1da1f2; }
+.catferrals-popup-social-btn.linkedin { background: #0077b5; }
+.catferrals-popup-social-btn.whatsapp { background: #25d366; }
+.catferrals-popup-social-btn.email { background: #ea4335; }
+
+.catferrals-popup-footer {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+/* Auto-dismiss countdown */
+.catferrals-popup-countdown {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .catferrals-post-purchase-popup {
+    padding: 24px;
+    width: 95%;
+    max-width: none;
+  }
+  
+  .catferrals-popup-title {
+    font-size: 1.3rem;
+  }
+  
+  .catferrals-popup-benefits {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .catferrals-popup-actions {
+    gap: 8px;
+  }
+  
+  .catferrals-popup-btn {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+  
+  .catferrals-popup-social-buttons {
+    gap: 6px;
+  }
+  
+  .catferrals-popup-social-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+}
+
+/* Animation keyframes */
+@keyframes bounceIn {
+  0%, 20%, 53%, 80%, 100% {
+    animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -6px, 0);
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -3px, 0);
+  }
+  90% {
+    transform: translate3d(0, -1px, 0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Loading state */
+.catferrals-popup-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.catferrals-popup-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+} 

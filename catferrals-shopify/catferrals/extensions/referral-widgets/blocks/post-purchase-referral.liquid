@@ -1,0 +1,424 @@
+{% comment %}
+  Catferrals Professional Post-Purchase Referral
+  Advanced post-purchase popup with sophisticated timing and design
+  VERSION: PROFESSIONAL-v16
+{% endcomment %}
+
+<div class="catferrals-post-purchase-referral" 
+     data-shop="{{ shop.permanent_domain }}"
+     data-trigger="{{ block.settings.trigger_timing }}"
+     data-delay="{{ block.settings.delay_seconds }}"
+     data-customer-email="{{ customer.email | default: '' }}"
+     data-customer-id="{{ customer.id | default: '' }}"
+     data-order-id="{{ order.id | default: '' }}"
+     data-order-total="{{ order.total_price | default: 0 }}"
+     data-customer-name="{{ customer.first_name | default: 'there' }}"
+     style="display: none;">
+</div>
+
+<script>
+(function() {
+  'use strict';
+  
+  console.log('🎯 PROFESSIONAL: Post-Purchase Referral Loading - v16');
+  
+  // Only initialize once
+  if (window.catferralsPostPurchaseLoaded) return;
+  window.catferralsPostPurchaseLoaded = true;
+
+  class CatferralsPostPurchase {
+    constructor(element) {
+      this.element = element;
+      this.trigger = element.dataset.trigger || 'immediate';
+      this.delay = parseInt(element.dataset.delay) || 3;
+      this.customerEmail = element.dataset.customerEmail;
+      this.customerId = element.dataset.customerId;
+      this.orderId = element.dataset.orderId;
+      this.orderTotal = element.dataset.orderTotal;
+      this.customerName = element.dataset.customerName || 'there';
+      this.isShown = false;
+      this.referralLink = this.generateReferralLink();
+      this.init();
+    }
+    
+    generateReferralLink() {
+      const baseUrl = window.location.origin;
+      const referralCode = this.customerEmail ? 
+        btoa(this.customerEmail).slice(0, 8).toUpperCase() : 
+        'CUSTOMER' + Math.random().toString(36).substr(2, 4).toUpperCase();
+      return baseUrl + '?ref=' + referralCode;
+    }
+    
+    async copyToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        this.showNotification('Link copied to clipboard! 🎉', 'success');
+      } catch (err) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        this.showNotification('Link copied! 📋', 'success');
+      }
+    }
+    
+    showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 10001;
+        background: ${type === 'success' ? '#10b981' : '#667eea'};
+        color: white; padding: 12px 20px; border-radius: 8px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 14px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        animation: slideIn 0.3s ease;
+      `;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+    
+    shareOnPlatform(platform) {
+      const shareUrl = this.referralLink;
+      const shareText = `Just had an amazing shopping experience! Thought you'd love this store too. Get 10% off your first order:`;
+      
+      const shareLinks = {
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+        twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
+        whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
+        email: `mailto:?subject=${encodeURIComponent('You\'ll love this store!')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`
+      };
+      
+      if (shareLinks[platform]) {
+        window.open(shareLinks[platform], '_blank', 'width=600,height=400');
+        this.showNotification(`Shared on ${platform.charAt(0).toUpperCase() + platform.slice(1)}! 🚀`);
+      }
+    }
+    
+    dismissPopup() {
+      const popup = document.getElementById('catferrals-post-purchase-popup');
+      if (popup) {
+        popup.style.animation = 'slideOut 0.4s ease';
+        setTimeout(() => popup.remove(), 400);
+      }
+    }
+    
+    joinReferralProgram() {
+      window.open('/apps/catferrals', '_blank');
+      this.showNotification('Opening referral program... 🎯');
+      this.dismissPopup();
+    }
+    
+    createPopupHTML() {
+      const orderValue = this.orderTotal ? `$${(parseFloat(this.orderTotal) / 100).toFixed(2)}` : '';
+      
+      return `
+        <div id="catferrals-post-purchase-popup" style="
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+          background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+          display: flex; align-items: center; justify-content: center; 
+          z-index: 10000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          animation: fadeIn 0.4s ease;
+        ">
+          <div style="
+            background: white; border-radius: 20px; width: 90%; max-width: 480px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); position: relative; overflow: hidden;
+            animation: slideUp 0.5s ease;
+          ">
+            
+            <!-- Header with celebration background -->
+            <div style="
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              padding: 32px 24px 24px 24px; text-align: center; color: white; position: relative;
+            ">
+              <div style="font-size: 3rem; margin-bottom: 8px;">🎉</div>
+              <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700;">
+                Thank you, ${this.customerName}!
+              </h2>
+              <p style="margin: 0; opacity: 0.9; font-size: 1rem;">
+                Your order ${orderValue ? 'of ' + orderValue + ' ' : ''}has been confirmed
+              </p>
+              
+              <!-- Close button -->
+              <button onclick="window.catferralsPostPurchase.dismissPopup()" style="
+                position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2); 
+                border: none; color: white; width: 32px; height: 32px; border-radius: 50%; 
+                cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;
+                transition: all 0.2s ease;
+              " onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                ×
+              </button>
+            </div>
+            
+            <!-- Main content -->
+            <div style="padding: 32px 24px;">
+              <div style="text-align: center; margin-bottom: 24px;">
+                <div style="
+                  display: inline-flex; align-items: center; gap: 12px; 
+                  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                  padding: 16px 20px; border-radius: 12px; margin-bottom: 16px;
+                ">
+                  <span style="font-size: 1.5rem;">��</span>
+                  <div style="text-align: left;">
+                    <div style="font-weight: 700; color: #0369a1; font-size: 1.1rem;">Give 10%, Get 10%</div>
+                    <div style="color: #0284c7; font-size: 0.85rem;">Share with friends and earn rewards!</div>
+                  </div>
+                </div>
+                
+                <p style="margin: 0; color: #4b5563; font-size: 0.95rem; line-height: 1.5;">
+                  Love your purchase? Share it with friends and earn <strong>10% back</strong> on every successful referral. 
+                  They'll get <strong>10% off</strong> their first order too!
+                </p>
+              </div>
+              
+              <!-- Referral link section -->
+              <div style="margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151; font-size: 0.9rem;">
+                  Your personal referral link:
+                </label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" readonly value="${this.referralLink}" style="
+                    flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; 
+                    font-size: 13px; background: white; color: #4b5563;
+                  ">
+                  <button onclick="window.catferralsPostPurchase.copyToClipboard('${this.referralLink}')" style="
+                    background: #667eea; color: white; border: none; padding: 10px 16px; 
+                    border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;
+                    transition: all 0.2s ease;
+                  " onmouseover="this.style.background='#5a67d8'" onmouseout="this.style.background='#667eea'">
+                    📋 Copy
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Quick share buttons -->
+              <div style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #374151; font-size: 0.9rem;">
+                  Quick share:
+                </label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                  <button onclick="window.catferralsPostPurchase.shareOnPlatform('facebook')" style="
+                    background: white; color: #4b5563; border: 1px solid #d1d5db; padding: 10px 12px; 
+                    border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;
+                    display: flex; align-items: center; justify-content: center; gap: 6px;
+                    transition: all 0.2s ease;
+                  " onmouseover="this.style.background='#1877f2'; this.style.color='white'; this.style.borderColor='transparent'" 
+                     onmouseout="this.style.background='white'; this.style.color='#4b5563'; this.style.borderColor='#d1d5db'">
+                    📘 Facebook
+                  </button>
+                  
+                  <button onclick="window.catferralsPostPurchase.shareOnPlatform('twitter')" style="
+                    background: white; color: #4b5563; border: 1px solid #d1d5db; padding: 10px 12px; 
+                    border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;
+                    display: flex; align-items: center; justify-content: center; gap: 6px;
+                    transition: all 0.2s ease;
+                  " onmouseover="this.style.background='#1da1f2'; this.style.color='white'; this.style.borderColor='transparent'" 
+                     onmouseout="this.style.background='white'; this.style.color='#4b5563'; this.style.borderColor='#d1d5db'">
+                    🐦 Twitter
+                  </button>
+                  
+                  <button onclick="window.catferralsPostPurchase.shareOnPlatform('whatsapp')" style="
+                    background: white; color: #4b5563; border: 1px solid #d1d5db; padding: 10px 12px; 
+                    border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;
+                    display: flex; align-items: center; justify-content: center; gap: 6px;
+                    transition: all 0.2s ease;
+                  " onmouseover="this.style.background='#25d366'; this.style.color='white'; this.style.borderColor='transparent'" 
+                     onmouseout="this.style.background='white'; this.style.color='#4b5563'; this.style.borderColor='#d1d5db'">
+                    💬 WhatsApp
+                  </button>
+                  
+                  <button onclick="window.catferralsPostPurchase.shareOnPlatform('email')" style="
+                    background: white; color: #4b5563; border: 1px solid #d1d5db; padding: 10px 12px; 
+                    border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;
+                    display: flex; align-items: center; justify-content: center; gap: 6px;
+                    transition: all 0.2s ease;
+                  " onmouseover="this.style.background='#ea4335'; this.style.color='white'; this.style.borderColor='transparent'" 
+                     onmouseout="this.style.background='white'; this.style.color='#4b5563'; this.style.borderColor='#d1d5db'">
+                    📧 Email
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Action buttons -->
+              <div style="display: flex; gap: 12px;">
+                <button onclick="window.catferralsPostPurchase.joinReferralProgram()" style="
+                  flex: 1; background: #10b981; color: white; border: none; padding: 14px 20px; 
+                  border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px;
+                  transition: all 0.2s ease;
+                " onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                  Join Program
+                </button>
+                
+                <button onclick="window.catferralsPostPurchase.dismissPopup()" style="
+                  flex: 1; background: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; 
+                  padding: 14px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px;
+                  transition: all 0.2s ease;
+                " onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+                  Maybe Later
+                </button>
+              </div>
+              
+              <!-- Trust signals -->
+              <div style="text-align: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                <p style="margin: 0; color: #9ca3af; font-size: 0.75rem;">
+                  🔒 Secure • 🎯 Easy to use • 💰 Instant rewards
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <style>
+          @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+          @keyframes slideUp { 0% { opacity: 0; transform: translateY(50px) scale(0.9); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+          @keyframes slideOut { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.9); } }
+          
+          @media (max-width: 640px) {
+            #catferrals-post-purchase-popup > div {
+              margin: 20px; width: calc(100% - 40px);
+            }
+            #catferrals-post-purchase-popup .grid-cols-2 {
+              grid-template-columns: 1fr;
+            }
+          }
+        </style>
+      `;
+    }
+    
+    showPopup() {
+      if (this.isShown) return;
+      this.isShown = true;
+      
+      console.log('🎯 PROFESSIONAL: Showing post-purchase popup');
+      const popupHTML = this.createPopupHTML();
+      document.body.insertAdjacentHTML('beforeend', popupHTML);
+    }
+    
+    init() {
+      console.log(`🎯 PROFESSIONAL: Initializing post-purchase popup - trigger: ${this.trigger}, delay: ${this.delay}s`);
+      
+      if (this.trigger === 'immediate') {
+        setTimeout(() => this.showPopup(), 1000); // Small delay for page load
+      } else if (this.trigger === 'delayed') {
+        setTimeout(() => this.showPopup(), this.delay * 1000);
+      } else if (this.trigger === 'on_scroll') {
+        let scrolled = false;
+        const handleScroll = () => {
+          if (!scrolled && window.scrollY > 200) {
+            scrolled = true;
+            this.showPopup();
+            window.removeEventListener('scroll', handleScroll);
+          }
+        };
+        window.addEventListener('scroll', handleScroll);
+      } else if (this.trigger === 'exit_intent') {
+        let exitShown = false;
+        const handleMouseLeave = (e) => {
+          if (!exitShown && e.clientY <= 0) {
+            exitShown = true;
+            this.showPopup();
+            document.removeEventListener('mouseleave', handleMouseLeave);
+          }
+        };
+        document.addEventListener('mouseleave', handleMouseLeave);
+      }
+    }
+  }
+
+  // Initialize post-purchase popup
+  function initializePostPurchase() {
+    const elements = document.querySelectorAll('.catferrals-post-purchase-referral');
+    elements.forEach(element => {
+      window.catferralsPostPurchase = new CatferralsPostPurchase(element);
+    });
+  }
+
+  // Initialize when ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializePostPurchase);
+  } else {
+    initializePostPurchase();
+  }
+  
+  console.log('🎯 PROFESSIONAL: Post-purchase system loaded');
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Post-Purchase Referral",
+  "target": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "trigger_timing",
+      "label": "Popup Trigger",
+      "default": "delayed",
+      "options": [
+        {"value": "immediate", "label": "Immediate (1 second delay)"},
+        {"value": "delayed", "label": "Delayed (custom timing)"},
+        {"value": "on_scroll", "label": "On Page Scroll"},
+        {"value": "exit_intent", "label": "Exit Intent"}
+      ]
+    },
+    {
+      "type": "range",
+      "id": "delay_seconds",
+      "label": "Delay (seconds)",
+      "min": 1,
+      "max": 30,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "text",
+      "id": "popup_title",
+      "label": "Popup Title",
+      "default": "Thank you for your purchase!"
+    },
+    {
+      "type": "textarea",
+      "id": "popup_message",
+      "label": "Main Message",
+      "default": "Love your purchase? Share it with friends and earn rewards!"
+    },
+    {
+      "type": "text",
+      "id": "referrer_reward",
+      "label": "Referrer Reward",
+      "default": "10%"
+    },
+    {
+      "type": "text",
+      "id": "referee_reward",
+      "label": "New Customer Reward", 
+      "default": "10%"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Primary Color",
+      "default": "#667eea"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#10b981"
+    }
+  ]
+}
+{% endschema %}

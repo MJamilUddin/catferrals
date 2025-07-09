@@ -1,0 +1,18 @@
+name = "Catferrals Referral Widgets"
+type = "theme"
+
+[[blocks]]
+type = "referral-widget"
+name = "Referral Widget"
+
+[[blocks]]
+type = "post-purchase-referral"
+name = "Post-Purchase Referral"
+
+[[blocks]]
+type = "referral-social-share"
+name = "Referral Social Share"
+
+[[app_embeds]]
+type = "referral-tracker"
+name = "Catferrals Referral Tracker" 

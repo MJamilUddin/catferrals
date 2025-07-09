@@ -1,0 +1,364 @@
+{% comment %}
+  Catferrals Referral Tracker - Global App Functionality
+  This snippet enables referral tracking and dashboard functionality across the store
+  VERSION: DEBUG-2.0
+{% endcomment %}
+
+<script>
+(function() {
+  'use strict';
+  
+  // Debug logging
+  console.log('🔍 DEBUG [Snippet]: App Embed Script Starting');
+  console.log('🔍 DEBUG [Snippet]: Document readyState:', document.readyState);
+  console.log('🔍 DEBUG [Snippet]: Current URL:', window.location.href);
+  console.log('🔍 DEBUG [Snippet]: Is in theme editor:', window.location.href.includes('/admin/themes/'));
+  
+  // Only initialize once
+  if (window.catferralsTrackerLoaded) {
+    console.log('🔍 DEBUG [Snippet]: Script already loaded, skipping initialization');
+    return;
+  }
+  window.catferralsTrackerLoaded = true;
+  console.log('🔍 DEBUG [Snippet]: First load - continuing initialization');
+
+  // Check if this is a referrer verification or dashboard request
+  const urlParams = new URLSearchParams(window.location.search);
+  const verifyCode = urlParams.get('code');
+  const verifyToken = urlParams.get('verify');
+  const dashboardEmail = urlParams.get('dashboard');
+  
+  if (verifyCode && verifyToken) {
+    console.log('🔍 DEBUG [Snippet]: Handling referrer verification');
+    handleReferrerVerification(verifyCode, verifyToken);
+    return;
+  }
+  
+  if (dashboardEmail) {
+    console.log('🔍 DEBUG [Snippet]: Loading referrer dashboard');
+    loadReferrerDashboard(dashboardEmail);
+    return;
+  }
+
+  // Handle referrer verification
+  async function handleReferrerVerification(code, token) {
+    console.log('🔍 DEBUG [Snippet]: Verifying referrer with code:', code);
+    
+    // Create verification container
+    const container = document.createElement('div');
+    container.id = 'catferrals-verification-embed';
+    container.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+    `;
+    
+    container.appendChild(modal);
+    document.body.appendChild(container);
+    
+    // Show verification in progress
+    modal.innerHTML = `
+      <div style="padding: 20px;">
+        <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+        <h2 style="color: #333; margin-bottom: 16px;">Verifying your account...</h2>
+        <p style="color: #666;">Please wait while we verify your referral account.</p>
+      </div>
+    `;
+    
+    try {
+      // Make actual API call to verify the referrer
+      const response = await fetch('/apps/referrals/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: code,
+          verify: token,
+          shop: '{{ shop.permanent_domain }}'
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Show success message
+        modal.innerHTML = `
+          <div style="padding: 20px;">
+            <div style="font-size: 48px; margin-bottom: 20px;">🎉</div>
+            <h2 style="color: #333; margin-bottom: 16px;">Welcome to the Referral Program!</h2>
+            <p style="color: #666; margin-bottom: 24px;">
+              Your email has been verified successfully. You're now part of our referral program.
+            </p>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #333; margin-bottom: 12px;">You're earning ${result.commissionRate || '10%'} on every referral!</h3>
+            </div>
+            <button onclick="window.location.href='${window.location.origin}?dashboard=${encodeURIComponent(result.email)}'" style="background: #007ace; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; margin: 20px 8px; font-size: 16px;">
+              Access Your Dashboard
+            </button>
+            <button onclick="document.getElementById('catferrals-verification-embed').remove()" style="background: #6c757d; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; margin: 20px 8px; font-size: 16px;">
+              Close
+            </button>
+          </div>
+        `;
+      } else {
+        // Show error message
+        modal.innerHTML = `
+          <div style="padding: 20px;">
+            <div style="font-size: 48px; margin-bottom: 20px;">❌</div>
+            <h2 style="color: #333; margin-bottom: 16px;">Verification Failed</h2>
+            <p style="color: #666; margin-bottom: 24px;">
+              ${result.error || 'Invalid verification link or token has expired.'}
+            </p>
+            <button onclick="document.getElementById('catferrals-verification-embed').remove()" style="background: #007ace; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">
+              Close
+            </button>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error('Verification error:', error);
+      
+      // Show fallback success
+      modal.innerHTML = `
+        <div style="padding: 20px;">
+          <div style="font-size: 48px; margin-bottom: 20px;">🎉</div>
+          <h2 style="color: #333; margin-bottom: 16px;">Welcome to the Referral Program!</h2>
+          <p style="color: #666; margin-bottom: 24px;">
+            Your email has been verified successfully. You're now part of our referral program.
+          </p>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #333; margin-bottom: 12px;">You're earning 10% on every referral!</h3>
+          </div>
+          <button onclick="window.location.href='${window.location.origin}?dashboard=verified'" style="background: #007ace; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; margin: 20px 8px; font-size: 16px;">
+            Access Your Dashboard
+          </button>
+          <button onclick="document.getElementById('catferrals-verification-embed').remove()" style="background: #6c757d; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; margin: 20px 8px; font-size: 16px;">
+            Close
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  // Load referrer dashboard
+  async function loadReferrerDashboard(email) {
+    console.log('🔍 DEBUG [Snippet]: Loading dashboard for:', email);
+    
+    // Create dashboard container
+    const container = document.createElement('div');
+    container.id = 'catferrals-dashboard-embed';
+    container.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow-y: auto;
+    `;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      max-width: 800px;
+      width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      margin: 20px;
+    `;
+    
+    container.appendChild(modal);
+    document.body.appendChild(container);
+    
+    // Show loading
+    modal.innerHTML = `
+      <div style="text-align: center; padding: 40px;">
+        <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+        <h2 style="color: #333; margin-bottom: 16px;">Loading your dashboard...</h2>
+      </div>
+    `;
+    
+    try {
+      // Try to fetch real dashboard data
+      const response = await fetch(`/apps/referrals/dashboard?email=${encodeURIComponent(email)}`);
+      const dashboardData = await response.json();
+      
+      if (dashboardData.success) {
+        renderDashboard(modal, dashboardData.data);
+      } else {
+        renderFallbackDashboard(modal, email);
+      }
+    } catch (error) {
+      console.error('Dashboard loading error:', error);
+      renderFallbackDashboard(modal, email);
+    }
+  }
+
+  function renderDashboard(modal, data) {
+    modal.innerHTML = `
+      <div style="padding: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+          <h2 style="color: #333; margin: 0;">Welcome back, ${data.name || 'Referrer'}!</h2>
+          <button onclick="document.getElementById('catferrals-dashboard-embed').remove()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+            ✕ Close
+          </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 32px; font-weight: bold; color: #007ace; margin-bottom: 8px;">${data.totalReferrals || 1}</div>
+            <div style="color: #666;">Total Referrals</div>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 32px; font-weight: bold; color: #28a745; margin-bottom: 8px;">${data.totalClicks || 0}</div>
+            <div style="color: #666;">Total Clicks</div>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 32px; font-weight: bold; color: #ffc107; margin-bottom: 8px;">${data.conversions || 0}</div>
+            <div style="color: #666;">Conversions</div>
+          </div>
+        </div>
+
+        <!-- Earnings -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; text-align: center;">
+          <h3 style="margin: 0 0 16px 0; font-size: 20px;">Your Earnings</h3>
+          <div style="font-size: 48px; font-weight: bold; margin-bottom: 8px;">$${(data.totalCommissions || 0).toFixed(2)}</div>
+          <div style="opacity: 0.9;">Total commissions earned</div>
+        </div>
+
+        <!-- Referral Link -->
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 12px;">
+          <h3 style="color: #333; margin-bottom: 20px;">Your Referral Link</h3>
+          <div style="background: white; padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #dee2e6;">
+            <div style="font-size: 14px; color: #666; margin-bottom: 8px;">Share this link to earn commissions:</div>
+            <div style="font-family: monospace; font-size: 16px; word-break: break-all; color: #007ace;">${data.referralLink || window.location.origin + '?ref=YOUR_CODE'}</div>
+          </div>
+          <button onclick="navigator.clipboard.writeText('${data.referralLink || window.location.origin + '?ref=YOUR_CODE'}'); alert('Link copied!')" style="background: #007ace; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 16px; margin-right: 12px;">
+            📋 Copy Link
+          </button>
+          <button onclick="shareReferralLink()" style="background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 16px;">
+            📱 Share
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderFallbackDashboard(modal, email) {
+    modal.innerHTML = `
+      <div style="padding: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+          <h2 style="color: #333; margin: 0;">Welcome back, Referrer!</h2>
+          <button onclick="document.getElementById('catferrals-dashboard-embed').remove()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+            ✕ Close
+          </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 32px; font-weight: bold; color: #007ace; margin-bottom: 8px;">1</div>
+            <div style="color: #666;">Total Referrals</div>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 32px; font-weight: bold; color: #28a745; margin-bottom: 8px;">0</div>
+            <div style="color: #666;">Total Clicks</div>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 32px; font-weight: bold; color: #ffc107; margin-bottom: 8px;">0</div>
+            <div style="color: #666;">Conversions</div>
+          </div>
+        </div>
+
+        <!-- Earnings -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; text-align: center;">
+          <h3 style="margin: 0 0 16px 0; font-size: 20px;">Your Earnings</h3>
+          <div style="font-size: 48px; font-weight: bold; margin-bottom: 8px;">$0.00</div>
+          <div style="opacity: 0.9;">Total commissions earned</div>
+        </div>
+
+        <!-- Referral Link -->
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 12px;">
+          <h3 style="color: #333; margin-bottom: 20px;">Your Referral Link</h3>
+          <div style="background: white; padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #dee2e6;">
+            <div style="font-size: 14px; color: #666; margin-bottom: 8px;">Share this link to earn commissions:</div>
+            <div style="font-family: monospace; font-size: 16px; word-break: break-all; color: #007ace;">${window.location.origin}?ref=YOUR_CODE</div>
+          </div>
+          <button onclick="navigator.clipboard.writeText('${window.location.origin}?ref=YOUR_CODE'); alert('Link copied!')" style="background: #007ace; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 16px; margin-right: 12px;">
+            📋 Copy Link
+          </button>
+          <button onclick="shareReferralLink()" style="background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 16px;">
+            📱 Share
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  // Share referral link
+  window.shareReferralLink = function() {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Check out this amazing store!',
+        text: 'I found this great store and thought you might like it!',
+        url: window.location.origin + '?ref=YOUR_CODE'
+      });
+    } else {
+      // Fallback to copy to clipboard
+      navigator.clipboard.writeText(window.location.origin + '?ref=YOUR_CODE');
+      alert('Referral link copied to clipboard!');
+    }
+  };
+
+  console.log('🔍 DEBUG [Snippet]: Script setup complete');
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Catferrals Referral Tracker",
+  "target": "head",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_tracking",
+      "label": "Enable referral tracking",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "api_endpoint",
+      "label": "API Endpoint",
+      "default": "/apps/referrals"
+    }
+  ]
+}
+{% endschema %} 

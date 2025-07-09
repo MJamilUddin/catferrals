@@ -1,0 +1,174 @@
+{% comment %}
+  Catferrals Post-Purchase Referral
+  Shows a referral popup after successful order completion
+  VERSION: catferrals-14-EMERGENCY-REBUILD
+{% endcomment %}
+
+<div class="catferrals-post-purchase-referral" 
+     data-shop="{{ shop.permanent_domain }}"
+     data-trigger="{{ block.settings.trigger_timing }}"
+     data-delay="{{ block.settings.delay_seconds }}"
+     data-customer-email="{{ customer.email | default: '' }}"
+     data-customer-id="{{ customer.id | default: '' }}"
+     data-order-id="{{ order.id | default: '' }}"
+     data-order-total="{{ order.total_price | default: 0 }}"
+     style="display: none;">
+  
+  {% comment %} This div will be populated by JavaScript {% endcomment %}
+  <div class="catferrals-popup-container"></div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+  
+  // DIAGNOSTIC LOGGING
+  console.log('🚀 CATFERRALS DEBUG: Post-Purchase Widget Script Loading - Version v14-EMERGENCY-REBUILD');
+  console.log('🚀 CATFERRALS DEBUG: Script loaded at:', new Date().toISOString());
+  console.log('🚀 CATFERRALS DEBUG: Current URL:', window.location.href);
+  
+  // Only initialize once
+  if (window.catferralsPostPurchaseLoaded) {
+    console.log('🚀 CATFERRALS DEBUG: Post-Purchase widget already loaded, skipping initialization');
+    return;
+  }
+  window.catferralsPostPurchaseLoaded = true;
+  console.log('🚀 CATFERRALS DEBUG: Setting catferralsPostPurchaseLoaded = true');
+
+  // Initialize post-purchase popup
+  function initializePostPurchasePopup(element) {
+    console.log('🚀 CATFERRALS DEBUG: Initializing post-purchase popup for element:', element);
+    const trigger = element.dataset.trigger || 'immediate';
+    const delay = parseInt(element.dataset.delay) || 3;
+    console.log('🚀 CATFERRALS DEBUG: Popup config - trigger:', trigger, 'delay:', delay);
+    
+    // Create popup HTML
+    const popupHTML = `
+      <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <div style="background: white; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #eee;">
+            <h3 style="margin: 0; font-size: 1.2rem;">🎉 Thank you for your purchase! [DEBUG v14-EMERGENCY-REBUILD]</h3>
+            <button onclick="this.closest('[style*=\"position: fixed\"]').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
+          </div>
+          <div style="padding: 24px; text-align: center;">
+            <p style="margin: 0 0 20px 0;">Share your purchase with friends and earn rewards!</p>
+            <div style="display: flex; gap: 12px;">
+              <button onclick="window.open('/apps/catferrals', '_blank'); this.closest('[style*=\"position: fixed\"]').remove();" style="background: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; flex: 1;">Share & Earn</button>
+              <button onclick="this.closest('[style*=\"position: fixed\"]').remove()" style="background: #f8f9fa; color: #666; border: 1px solid #ddd; padding: 12px 24px; border-radius: 6px; cursor: pointer; flex: 1;">Maybe Later</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Show popup based on trigger
+    function showPopup() {
+      console.log('🚀 CATFERRALS DEBUG: Showing post-purchase popup');
+      const popup = document.createElement('div');
+      popup.innerHTML = popupHTML;
+      document.body.appendChild(popup.firstElementChild);
+    }
+    
+    if (trigger === 'immediate') {
+      console.log('🚀 CATFERRALS DEBUG: Triggering popup immediately');
+      showPopup();
+    } else if (trigger === 'delayed') {
+      console.log('🚀 CATFERRALS DEBUG: Triggering popup after', delay, 'seconds');
+      setTimeout(showPopup, delay * 1000);
+    } else if (trigger === 'on_scroll') {
+      console.log('🚀 CATFERRALS DEBUG: Setting up scroll trigger');
+      let scrolled = false;
+      window.addEventListener('scroll', function() {
+        if (!scrolled && window.scrollY > 200) {
+          scrolled = true;
+          console.log('🚀 CATFERRALS DEBUG: Scroll threshold reached, showing popup');
+          showPopup();
+        }
+      });
+    }
+  }
+
+  // Initialize all post-purchase popups on page load
+  function initializeAllPopups() {
+    console.log('🚀 CATFERRALS DEBUG: Starting post-purchase popup initialization');
+    const popups = document.querySelectorAll('.catferrals-post-purchase-referral');
+    console.log('🚀 CATFERRALS DEBUG: Found', popups.length, 'popups to initialize');
+    popups.forEach(initializePostPurchasePopup);
+    console.log('🚀 CATFERRALS DEBUG: Post-purchase popup initialization complete');
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    console.log('🚀 CATFERRALS DEBUG: DOM still loading, adding event listener for post-purchase');
+    document.addEventListener('DOMContentLoaded', initializeAllPopups);
+  } else {
+    console.log('🚀 CATFERRALS DEBUG: DOM already loaded, initializing post-purchase immediately');
+    initializeAllPopups();
+  }
+  
+  console.log('🚀 CATFERRALS DEBUG: Post-purchase script setup complete');
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Post-Purchase Referral",
+  "target": "section",
+  "stylesheet": "post-purchase-referral.css",
+  "settings": [
+    {
+      "type": "select",
+      "id": "trigger_timing",
+      "label": "Trigger Timing",
+      "default": "immediate",
+      "options": [
+        {
+          "value": "immediate",
+          "label": "Immediate"
+        },
+        {
+          "value": "delayed",
+          "label": "Delayed"
+        },
+        {
+          "value": "on_scroll",
+          "label": "On Page Scroll"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "delay_seconds",
+      "label": "Delay (seconds)",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "text",
+      "id": "popup_title",
+      "label": "Popup Title",
+      "default": "Share and Earn!"
+    },
+    {
+      "type": "textarea",
+      "id": "popup_message",
+      "label": "Popup Message",
+      "default": "Thanks for your purchase! Share with friends and earn rewards."
+    },
+    {
+      "type": "color",
+      "id": "popup_background",
+      "label": "Popup Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#007ace"
+    }
+  ]
+}
+{% endschema %} 

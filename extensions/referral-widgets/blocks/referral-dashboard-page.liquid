@@ -1,0 +1,204 @@
+{% comment %}
+  Catferrals Referral Dashboard Page Template
+  A dedicated page template for referrers to view their dashboard
+  VERSION: 1.0.0
+{% endcomment %}
+
+{% render 'global-referral-tracker' %}
+
+<div class="catferrals-dashboard-page" 
+     data-shop="{{ shop.permanent_domain }}"
+     data-customer-email="{{ customer.email | default: '' }}"
+     data-customer-id="{{ customer.id | default: '' }}">
+  
+  <!-- Dashboard Container -->
+  <div id="catferrals-dashboard-container">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 40px 20px;">
+      <!-- Loading State -->
+      <div id="catferrals-dashboard-loading" style="text-align: center; padding: 60px 0;">
+        <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+        <h2 style="color: #333; margin-bottom: 16px;">Loading your dashboard...</h2>
+        <p style="color: #666;">Please wait while we fetch your referral data.</p>
+      </div>
+      
+      <!-- Error State -->
+      <div id="catferrals-dashboard-error" style="display: none; text-align: center; padding: 60px 0;">
+        <div style="font-size: 48px; margin-bottom: 20px;">❌</div>
+        <h2 style="color: #333; margin-bottom: 16px;">Oops! Something went wrong</h2>
+        <p style="color: #666;">Unable to load your referral dashboard. Please try again later.</p>
+      </div>
+      
+      <!-- Dashboard Content -->
+      <div id="catferrals-dashboard-content" style="display: none;">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+  
+  console.log('🔍 Referral Dashboard Page: Initializing');
+  
+  function initializeDashboard() {
+    const container = document.getElementById('catferrals-dashboard-container');
+    if (!container) return;
+    
+    const dashboardElement = container.closest('.catferrals-dashboard-page');
+    const email = dashboardElement?.dataset.customerEmail;
+    
+    if (email) {
+      loadDashboard(email);
+    } else {
+      showLoginPrompt();
+    }
+  }
+
+  function loadDashboard(email) {
+    console.log('🔍 Loading dashboard for:', email);
+    
+    fetch('/apps/referrals/dashboard?email=' + encodeURIComponent(email))
+      .then(response => response.json())
+      .then(result => {
+        console.log('🔍 Dashboard data:', result);
+        if (result.success) {
+          renderDashboard(result.data);
+        } else {
+          showError(result.error || 'Failed to load dashboard');
+        }
+      })
+      .catch(err => {
+        console.error('🔍 Dashboard load failed:', err);
+        showError('Unable to load dashboard');
+      });
+  }
+
+  function renderDashboard(data) {
+    const content = document.getElementById('catferrals-dashboard-content');
+    const loading = document.getElementById('catferrals-dashboard-loading');
+    const error = document.getElementById('catferrals-dashboard-error');
+    
+    if (!content) return;
+    
+    content.innerHTML = `
+      <div style="margin-bottom: 40px;">
+        <h1 style="font-size: 2.5em; margin-bottom: 16px;">Your Referral Dashboard</h1>
+        <p style="color: #666; font-size: 1.1em;">Track your referrals and earnings in real-time.</p>
+      </div>
+      
+      <!-- Stats Cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-bottom: 40px;">
+        <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+          <div style="font-size: 32px; font-weight: bold; color: #007ace; margin-bottom: 8px;">${data.totalReferrals || 0}</div>
+          <div style="color: #666;">Total Referrals</div>
+        </div>
+        <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+          <div style="font-size: 32px; font-weight: bold; color: #28a745; margin-bottom: 8px;">${data.totalClicks || 0}</div>
+          <div style="color: #666;">Total Clicks</div>
+        </div>
+        <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+          <div style="font-size: 32px; font-weight: bold; color: #ffc107; margin-bottom: 8px;">$${(data.totalCommissions || 0).toFixed(2)}</div>
+          <div style="color: #666;">Total Earnings</div>
+        </div>
+      </div>
+      
+      <!-- Referral Link Section -->
+      <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); margin-bottom: 40px;">
+        <h2 style="margin: 0 0 16px 0; font-size: 1.5em;">Your Referral Link</h2>
+        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+          <code style="word-break: break-all; font-family: monospace;">${data.referralLink || window.location.origin + '?ref=' + data.code}</code>
+        </div>
+        <button onclick="navigator.clipboard.writeText('${data.referralLink || window.location.origin + '?ref=' + data.code}')" 
+                style="background: #007ace; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+          Copy Link
+        </button>
+      </div>
+      
+      <!-- Recent Activity -->
+      <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+        <h2 style="margin: 0 0 24px 0; font-size: 1.5em;">Recent Activity</h2>
+        ${data.recentActivity && data.recentActivity.length > 0 ? `
+          <div style="display: grid; gap: 16px;">
+            ${data.recentActivity.map(activity => `
+              <div style="padding: 16px; background: #f8f9fa; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <div style="font-weight: 600;">${activity.type}</div>
+                    <div style="color: #666; font-size: 0.9em;">${new Date(activity.date).toLocaleDateString()}</div>
+                  </div>
+                  ${activity.amount ? `<div style="color: #28a745; font-weight: 600;">$${activity.amount.toFixed(2)}</div>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div style="text-align: center; padding: 32px; background: #f8f9fa; border-radius: 8px;">
+            <p style="color: #666; margin: 0;">No recent activity to display</p>
+          </div>
+        `}
+      </div>
+    `;
+    
+    loading.style.display = 'none';
+    error.style.display = 'none';
+    content.style.display = 'block';
+  }
+
+  function showError(message) {
+    const content = document.getElementById('catferrals-dashboard-content');
+    const loading = document.getElementById('catferrals-dashboard-loading');
+    const error = document.getElementById('catferrals-dashboard-error');
+    
+    if (!error) return;
+    
+    error.querySelector('p').textContent = message;
+    loading.style.display = 'none';
+    content.style.display = 'none';
+    error.style.display = 'block';
+  }
+
+  function showLoginPrompt() {
+    const content = document.getElementById('catferrals-dashboard-content');
+    const loading = document.getElementById('catferrals-dashboard-loading');
+    const error = document.getElementById('catferrals-dashboard-error');
+    
+    content.innerHTML = `
+      <div style="text-align: center; padding: 60px 0;">
+        <div style="font-size: 48px; margin-bottom: 20px;">👋</div>
+        <h2 style="color: #333; margin-bottom: 16px;">Welcome to the Referral Program</h2>
+        <p style="color: #666; margin-bottom: 24px;">Please log in to view your referral dashboard.</p>
+        <a href="/account/login" style="background: #007ace; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; display: inline-block;">
+          Log In
+        </a>
+      </div>
+    `;
+    
+    loading.style.display = 'none';
+    error.style.display = 'none';
+    content.style.display = 'block';
+  }
+
+  // Initialize when ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDashboard);
+  } else {
+    initializeDashboard();
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Referral Dashboard Page",
+  "target": "section",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Referral Dashboard"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %} 
