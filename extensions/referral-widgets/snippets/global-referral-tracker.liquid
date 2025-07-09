@@ -57,7 +57,8 @@
   // Handle verification
   if (verifyCode && verifyToken) {
     console.log('🔍 Global Referral Tracker: Handling verification');
-    handleReferrerVerification(verifyCode, verifyToken);
+    // First check verification status before attempting verification
+    checkVerificationStatus(verifyCode, verifyToken);
   }
 
   // Load dashboard
@@ -69,6 +70,79 @@
   // Make global functions available
   window.catferralsOpenDashboard = openDashboard;
   window.catferralsVerifyReferrer = handleReferrerVerification;
+
+  function checkVerificationStatus(code, token) {
+    console.log('🔍 Global Referral Tracker: Checking verification status for', code);
+    
+    // Check if already verified using GET request
+    fetch(`http://localhost:59094/proxy/verify?code=${encodeURIComponent(code)}&verify=${encodeURIComponent(token)}&shop=${encodeURIComponent(SHOP_DOMAIN)}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(result => {
+      console.log('🔍 Global Referral Tracker: Verification status:', result);
+      
+      if (result.success && result.verified) {
+        // Already verified - show welcome message without verification modal
+        console.log('🔍 Global Referral Tracker: User already verified, showing welcome message');
+        showAlreadyVerifiedMessage(result.referrer);
+      } else if (result.success && !result.verified) {
+        // Not yet verified - proceed with verification
+        console.log('🔍 Global Referral Tracker: User not verified, proceeding with verification');
+        handleReferrerVerification(code, token);
+      } else {
+        // Invalid or expired token - show error but don't be intrusive
+        console.log('🔍 Global Referral Tracker: Invalid verification parameters');
+        // Don't show error modal for invalid tokens as user might be just browsing
+      }
+    })
+    .catch(err => {
+      console.error('🔍 Global Referral Tracker: Status check failed:', err);
+      // Fallback to normal verification flow
+      handleReferrerVerification(code, token);
+    });
+  }
+
+  function showAlreadyVerifiedMessage(referrer) {
+    // Create a small, non-intrusive notification instead of a modal
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 16px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10000;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      max-width: 300px;
+      cursor: pointer;
+    `;
+    
+    notification.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 18px;">✅</span>
+        <div>
+          <div style="font-weight: 600; margin-bottom: 4px;">Welcome back!</div>
+          <div style="opacity: 0.9; font-size: 13px;">Your referral account is verified and active.</div>
+        </div>
+      </div>
+    `;
+    
+    notification.onclick = () => notification.remove();
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+    }, 5000);
+  }
 
   function handleReferrerVerification(code, token) {
     console.log('🔍 Global Referral Tracker: Verifying referrer', code);
@@ -85,8 +159,8 @@
     
     document.body.appendChild(modal);
 
-    // Verify with backend
-    fetch('/apps/referrals/verify', {
+    // Verify with backend using localhost URL
+    fetch('http://localhost:59094/apps/referrals/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

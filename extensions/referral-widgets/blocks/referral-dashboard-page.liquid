@@ -59,7 +59,10 @@
   function loadDashboard(email) {
     console.log('🔍 Loading dashboard for:', email);
     
-    fetch('/apps/referrals/dashboard?email=' + encodeURIComponent(email))
+    const shopDomain = document.querySelector('[data-shop]')?.dataset?.shop || window.location.hostname;
+    const apiUrl = 'http://localhost:59094/api/referral-dashboard';
+    
+    fetch(apiUrl + '?email=' + encodeURIComponent(email) + '&shop=' + encodeURIComponent(shopDomain))
       .then(response => response.json())
       .then(result => {
         console.log('🔍 Dashboard data:', result);
@@ -193,12 +196,6 @@
 {
   "name": "Referral Dashboard Page",
   "target": "section",
-  "settings": [],
-  "presets": [
-    {
-      "name": "Referral Dashboard"
-    }
-  ],
-  "templates": ["page"]
+  "settings": []
 }
 {% endschema %} 

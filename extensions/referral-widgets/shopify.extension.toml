@@ -1,6 +1,23 @@
 name = "Catferrals Referral Widgets"
 type = "theme"
 
+# App Blocks (for app embeds section)
+[[blocks]]
+type = "referral-dashboard-embed"
+name = "Referral Dashboard"
+target = "body"
+
+[[blocks]]
+type = "referral-widget-embed"
+name = "Referral Widget"
+target = "body"
+
+[[blocks]]
+type = "referral-social-share-embed"
+name = "Referral Social Share"
+target = "body"
+
+# Section Blocks (for sections)
 [[blocks]]
 type = "referral-widget"
 name = "Referral Widget"

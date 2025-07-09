@@ -144,87 +144,68 @@
 
 {% schema %}
 {
-  "name": "Social Share Referral",
+  "name": "Referral Social Share",
   "target": "section",
-  "stylesheet": "referral-social-share.css",
   "settings": [
     {
-      "type": "select",
-      "id": "layout",
-      "label": "Layout",
-      "default": "horizontal",
-      "options": [
-        {
-          "value": "horizontal",
-          "label": "Horizontal"
-        },
-        {
-          "value": "vertical",
-          "label": "Vertical"
-        },
-        {
-          "value": "grid",
-          "label": "Grid"
-        }
-      ]
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Share & Earn"
     },
     {
-      "type": "select",
-      "id": "button_size",
-      "label": "Button Size",
-      "default": "medium",
-      "options": [
-        {
-          "value": "small",
-          "label": "Small"
-        },
-        {
-          "value": "medium",
-          "label": "Medium"
-        },
-        {
-          "value": "large",
-          "label": "Large"
-        }
-      ]
-    },
-    {
-      "type": "select",
-      "id": "alignment",
-      "label": "Alignment",
-      "default": "center",
-      "options": [
-        {
-          "value": "left",
-          "label": "Left"
-        },
-        {
-          "value": "center",
-          "label": "Center"
-        },
-        {
-          "value": "right",
-          "label": "Right"
-        }
-      ]
+      "type": "textarea",
+      "id": "description",
+      "label": "Description", 
+      "default": "Share your referral link and earn commissions"
     },
     {
       "type": "text",
-      "id": "share_message",
-      "label": "Share Message",
-      "default": "Check out this amazing product!"
+      "id": "share_text",
+      "label": "Share Text",
+      "default": "Check out this amazing store!"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_facebook",
+      "label": "Show Facebook",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_twitter", 
+      "label": "Show Twitter",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_email",
+      "label": "Show Email",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_whatsapp",
+      "label": "Show WhatsApp", 
+      "default": true
     },
     {
       "type": "color",
-      "id": "button_color",
-      "label": "Button Color",
-      "default": "#007ace"
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
     },
     {
       "type": "color",
       "id": "text_color",
       "label": "Text Color",
-      "default": "#ffffff"
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#007ace"
     }
   ]
 }

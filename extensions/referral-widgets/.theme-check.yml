@@ -1,0 +1,11 @@
+AppBlockMissingSchema:
+  enabled: false
+  severity: warning
+
+ThemeAppExtensionSchema:
+  enabled: false
+  severity: warning
+
+LiquidTagUnknown:
+  enabled: false
+  severity: warning 

@@ -114,54 +114,42 @@
 {
   "name": "Post-Purchase Referral",
   "target": "section",
-  "stylesheet": "post-purchase-referral.css",
   "settings": [
     {
-      "type": "select",
-      "id": "trigger_timing",
-      "label": "Trigger Timing",
-      "default": "immediate",
-      "options": [
-        {
-          "value": "immediate",
-          "label": "Immediate"
-        },
-        {
-          "value": "delayed",
-          "label": "Delayed"
-        },
-        {
-          "value": "on_scroll",
-          "label": "On Page Scroll"
-        }
-      ]
-    },
-    {
-      "type": "range",
-      "id": "delay_seconds",
-      "label": "Delay (seconds)",
-      "min": 0,
-      "max": 30,
-      "step": 1,
-      "default": 3
-    },
-    {
       "type": "text",
-      "id": "popup_title",
-      "label": "Popup Title",
-      "default": "Share and Earn!"
+      "id": "title",
+      "label": "Title",
+      "default": "Refer Friends & Earn Rewards"
     },
     {
       "type": "textarea",
-      "id": "popup_message",
-      "label": "Popup Message",
-      "default": "Thanks for your purchase! Share with friends and earn rewards."
+      "id": "description",
+      "label": "Description", 
+      "default": "Share your referral link with friends and earn commission on every purchase they make!"
+    },
+    {
+      "type": "text",
+      "id": "commission_rate",
+      "label": "Commission Rate Display",
+      "default": "10%"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Get My Referral Link"
     },
     {
       "type": "color",
-      "id": "popup_background",
-      "label": "Popup Background Color",
-      "default": "#ffffff"
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#f8f9fa"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color", 
+      "default": "#333333"
     },
     {
       "type": "color",
