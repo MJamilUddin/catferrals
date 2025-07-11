@@ -128,14 +128,14 @@
           </button>
         </div>
         
-        ${data.dashboardUrl ? `
         <!-- View Full Dashboard -->
         <div style="text-align: center;">
-          <a href="${data.dashboardUrl}" style="color: ${accentColor}; text-decoration: none; font-size: 0.9em;">
+          <a href="http://localhost:55891/portal?shop=${encodeURIComponent('{{ shop.permanent_domain }}')}&email=${encodeURIComponent('{{ customer.email }}')}" 
+             target="_blank" 
+             style="color: ${accentColor}; text-decoration: none; font-size: 0.9em;">
             View Full Dashboard →
           </a>
         </div>
-        ` : ''}
         
       </div>
     `;

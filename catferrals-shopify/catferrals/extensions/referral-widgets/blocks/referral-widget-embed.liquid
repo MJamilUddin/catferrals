@@ -43,7 +43,8 @@
         
         <!-- CTA Button -->
         {% if customer %}
-          <a href="/portal?shop={{ shop.permanent_domain | url_encode }}&email={{ customer.email | url_encode }}" 
+          <a href="http://localhost:55891/portal?shop={{ shop.permanent_domain | url_encode }}&email={{ customer.email | url_encode }}" 
+             target="_blank"
              style="background: {{ block.settings.accent_color }}; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 1em;">
             {{ block.settings.cta_text_logged_in }}
           </a>

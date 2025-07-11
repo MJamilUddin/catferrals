@@ -42,11 +42,10 @@
   // Track referral visit
   if (referralCode) {
     console.log('🔍 Global Referral Tracker: Tracking referral visit', referralCode);
-    fetch('/apps/referrals/track-visit', {
+    fetch('http://localhost:55891/api/track/' + referralCode, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        code: referralCode,
         shop: SHOP_DOMAIN,
         url: window.location.href,
         timestamp: new Date().toISOString()
@@ -188,7 +187,7 @@
     
     document.body.appendChild(modal);
 
-    fetch('/apps/referrals/dashboard?email=' + encodeURIComponent(email))
+    fetch('http://localhost:55891/api/referral-dashboard?email=' + encodeURIComponent(email) + '&shop=' + encodeURIComponent(SHOP_DOMAIN))
       .then(response => response.json())
       .then(result => {
         console.log('🔍 Global Referral Tracker: Dashboard data:', result);
