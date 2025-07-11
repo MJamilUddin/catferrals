@@ -109,9 +109,9 @@
       <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); margin-bottom: 40px;">
         <h2 style="margin: 0 0 16px 0; font-size: 1.5em;">Your Referral Link</h2>
         <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-          <code style="word-break: break-all; font-family: monospace;">${data.referralLink || window.location.origin + '?ref=' + data.code}</code>
+          <code style="word-break: break-all; font-family: monospace;">${data.referralLink || 'http://localhost:55891/api/track/' + data.code}</code>
         </div>
-        <button onclick="navigator.clipboard.writeText('${data.referralLink || window.location.origin + '?ref=' + data.code}')" 
+        <button onclick="navigator.clipboard.writeText('${data.referralLink || 'http://localhost:55891/api/track/' + data.code}')" 
                 style="background: #007ace; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600;">
           Copy Link
         </button>

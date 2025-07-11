@@ -120,9 +120,9 @@
         <div style="background: rgba(0,0,0,0.02); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
           <div style="font-size: 0.9em; color: #666; margin-bottom: 8px;">Your Referral Link:</div>
           <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #e0e0e0;">
-            <code style="word-break: break-all; font-family: monospace; font-size: 0.8em;">${data.referralLink || window.location.origin + '?ref=' + data.code}</code>
+            <code style="word-break: break-all; font-family: monospace; font-size: 0.8em;">${data.referralLink || 'http://localhost:55891/api/track/' + data.code}</code>
           </div>
-          <button onclick="navigator.clipboard.writeText('${data.referralLink || window.location.origin + '?ref=' + data.code}'); this.innerHTML = 'Copied!'; setTimeout(() => this.innerHTML = 'Copy Link', 2000);" 
+          <button onclick="navigator.clipboard.writeText('${data.referralLink || 'http://localhost:55891/api/track/' + data.code}'); this.innerHTML = 'Copied!'; setTimeout(() => this.innerHTML = 'Copy Link', 2000);" 
                   style="background: ${accentColor}; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9em; width: 100%;">
             Copy Link
           </button>

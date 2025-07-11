@@ -363,7 +363,11 @@ export default function ReferrerPortal() {
           <div className="section">
             <h2>Your Referral Links</h2>
             
-            {referrer.referrals.map((referral: any) => (
+            {referrer.referrals.map((referral: any) => {
+              // Generate tracking link dynamically
+              const trackingLink = `http://localhost:55891/api/track/${referral.referralCode}`;
+              
+              return (
               <div key={referral.id} className="referral-card">
                 <div className="referral-header">
                   <div className="program-name">{referral.program.name}</div>
@@ -375,7 +379,7 @@ export default function ReferrerPortal() {
                 <div className="link-container">
                   <input
                     type="text"
-                    value={referral.referralLink}
+                    value={trackingLink}
                     readOnly
                     className="link-input"
                   />
@@ -384,7 +388,7 @@ export default function ReferrerPortal() {
                 <div className="actions">
                   <button 
                     className={`btn ${copiedCode === referral.referralCode ? 'copied' : ''}`}
-                    onClick={() => copyToClipboard(referral.referralLink, referral.referralCode)}
+                    onClick={() => copyToClipboard(trackingLink, referral.referralCode)}
                   >
                     {copiedCode === referral.referralCode ? '✓ Copied!' : '📋 Copy Link'}
                   </button>
@@ -392,7 +396,7 @@ export default function ReferrerPortal() {
                     className="btn btn-secondary"
                     onClick={() => {
                       const subject = encodeURIComponent(`Join ${referral.program.name}`);
-                      const body = encodeURIComponent(`Check this out: ${referral.referralLink}`);
+                      const body = encodeURIComponent(`Check this out: ${trackingLink}`);
                       window.open(`mailto:?subject=${subject}&body=${body}`);
                     }}
                   >
@@ -408,7 +412,8 @@ export default function ReferrerPortal() {
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

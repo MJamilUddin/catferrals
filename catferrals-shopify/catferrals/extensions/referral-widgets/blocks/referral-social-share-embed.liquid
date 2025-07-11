@@ -86,7 +86,7 @@
       loadReferralLink(email);
     } else {
       // Use default sharing for non-logged in users
-      referralLink = window.location.origin + '?ref=share';
+      referralLink = 'http://localhost:55891/api/track/GUEST';
       setupShareButtons();
     }
   }
@@ -102,15 +102,15 @@
       .then(result => {
         console.log('🔍 Share referral data:', result);
         if (result.success && result.data) {
-          referralLink = result.data.referralLink || (window.location.origin + '?ref=' + result.data.code);
+          referralLink = result.data.referralLink || ('http://localhost:55891/api/track/' + result.data.code);
         } else {
-          referralLink = window.location.origin + '?ref=share';
+          referralLink = 'http://localhost:55891/api/track/DEFAULT';
         }
         setupShareButtons();
       })
       .catch(err => {
         console.error('🔍 Share link load failed:', err);
-        referralLink = window.location.origin + '?ref=share';
+        referralLink = 'http://localhost:55891/api/track/DEFAULT';
         setupShareButtons();
       });
   }

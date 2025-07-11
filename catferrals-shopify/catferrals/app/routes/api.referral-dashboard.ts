@@ -70,7 +70,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
     // Get primary referral link (first active referral)
     const primaryReferral = referrals.find(r => r.status !== 'expired') || referrals[0];
-    const referralLink = primaryReferral?.referralLink || `https://${shopDomain}?ref=${primaryReferral?.referralCode}`;
+    const referralLink = primaryReferral?.referralCode ? 
+      `http://localhost:55891/api/track/${primaryReferral.referralCode}` : 
+      `http://localhost:55891/api/track/DEFAULT_CODE`;
     const referralCode = primaryReferral?.referralCode;
 
     // Recent activity (last 10 conversions)
