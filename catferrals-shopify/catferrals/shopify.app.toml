@@ -3,7 +3,7 @@
 client_id = "8676cc7c32cbc78d5a400a0e4d2bffcc"
 name = "catferrals"
 handle = "catferrals"
-application_url = "https://function-anthropology-cape-wanna.trycloudflare.com"
+application_url = "https://widely-geography-updates-collect.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,7 +26,7 @@ api_version = "2025-04"
 scopes = "write_products"
 
 [auth]
-redirect_urls = ["https://function-anthropology-cape-wanna.trycloudflare.com/auth/callback", "https://function-anthropology-cape-wanna.trycloudflare.com/auth/shopify/callback", "https://function-anthropology-cape-wanna.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://widely-geography-updates-collect.trycloudflare.com/auth/callback", "https://widely-geography-updates-collect.trycloudflare.com/auth/shopify/callback", "https://widely-geography-updates-collect.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

@@ -1,18 +1,44 @@
 name = "Catferrals Referral Widgets"
 type = "theme"
 
+# App Blocks (for app embeds section)
+[[blocks]]
+type = "referral-dashboard-embed"
+name = "Referral Dashboard"
+target = "body"
+
+[[blocks]]
+type = "referral-widget-embed"
+name = "Referral Widget"
+target = "body"
+
+[[blocks]]
+type = "referral-social-share-embed"
+name = "Referral Social Share"
+target = "body"
+
+# Section Blocks (for sections)
 [[blocks]]
 type = "referral-widget"
 name = "Referral Widget"
+target = "section"
 
 [[blocks]]
 type = "post-purchase-referral"
 name = "Post-Purchase Referral"
+target = "section"
 
 [[blocks]]
 type = "referral-social-share"
 name = "Referral Social Share"
+target = "section"
 
-[[app_embeds]]
-type = "referral-tracker"
-name = "Catferrals Referral Tracker" 
+[[blocks]]
+type = "referral-dashboard-page"
+name = "Referral Dashboard Page"
+target = "section"
+template = ["page"]
+
+[[snippets]]
+name = "global-referral-tracker"
+target = "head" 
