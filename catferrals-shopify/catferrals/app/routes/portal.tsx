@@ -3,6 +3,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { useState } from "react";
 import db from "../db.server";
+import { getTrackingUrl } from "../utils/url-helper";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -23,6 +24,23 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         }
       }
     });
+
+    // ✅ FIXED: Generate tracking URLs in loader using URL helper
+    if (referrer) {
+      const referralsWithUrls = referrer.referrals.map(referral => ({
+        ...referral,
+        trackingUrl: getTrackingUrl(request, referral.referralCode)
+      }));
+      
+      return json({ 
+        referrer: {
+          ...referrer,
+          referrals: referralsWithUrls
+        }, 
+        error: null, 
+        shop 
+      });
+    }
 
     return json({ referrer, error: null, shop });
   } catch (error) {
@@ -364,8 +382,8 @@ export default function ReferrerPortal() {
             <h2>Your Referral Links</h2>
             
             {referrer.referrals.map((referral: any) => {
-              // Generate tracking link dynamically
-              const trackingLink = `http://localhost:55891/api/track/${referral.referralCode}`;
+              // ✅ FIXED: Use pre-generated tracking URL from loader
+              const trackingLink = referral.trackingUrl;
               
               return (
               <div key={referral.id} className="referral-card">

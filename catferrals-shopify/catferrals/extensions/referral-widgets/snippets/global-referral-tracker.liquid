@@ -4,6 +4,8 @@
   VERSION: 2.0.0
 {% endcomment %}
 
+{% render 'catferrals-config' %}
+
 <script>
 (function() {
   'use strict';
@@ -42,7 +44,11 @@
   // Track referral visit
   if (referralCode) {
     console.log('🔍 Global Referral Tracker: Tracking referral visit', referralCode);
-    fetch('http://localhost:55891/api/track/' + referralCode, {
+    
+    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+    const trackingUrl = window.CatferralsConfig.getTrackingUrl(referralCode);
+    
+    fetch(trackingUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -72,7 +78,10 @@
   function checkVerificationStatus(code, token) {
     console.log('🔍 Global Referral Tracker: Checking verification status for', code);
     
-    fetch(`http://localhost:55891/proxy/verify?code=${encodeURIComponent(code)}&verify=${encodeURIComponent(token)}&shop=${encodeURIComponent(SHOP_DOMAIN)}`, {
+    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+    const statusUrl = window.CatferralsConfig.getVerificationStatusUrl(code, token, SHOP_DOMAIN);
+
+    fetch(statusUrl, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     })
@@ -148,7 +157,10 @@
     
     document.body.appendChild(modal);
 
-    fetch('http://localhost:55891/apps/referrals/verify', {
+    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+    const verifyUrl = window.CatferralsConfig.getVerifyReferrerUrl(code, token, SHOP_DOMAIN);
+
+    fetch(verifyUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -187,7 +199,10 @@
     
     document.body.appendChild(modal);
 
-    fetch('http://localhost:55891/api/referral-dashboard?email=' + encodeURIComponent(email) + '&shop=' + encodeURIComponent(SHOP_DOMAIN))
+    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+    const dashboardUrl = window.CatferralsConfig.getDashboardUrl(email, SHOP_DOMAIN);
+
+    fetch(dashboardUrl)
       .then(response => response.json())
       .then(result => {
         console.log('🔍 Global Referral Tracker: Dashboard data:', result);

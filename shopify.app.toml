@@ -3,7 +3,7 @@
 client_id = "8676cc7c32cbc78d5a400a0e4d2bffcc"
 name = "catferrals"
 handle = "catferrals"
-application_url = "https://begin-assign-assignment-miracle.trycloudflare.com"
+application_url = "http://localhost:54792"
 embedded = true
 
 [build]
@@ -21,8 +21,12 @@ api_version = "2025-04"
   topics = [ "app/uninstalled" ]
   uri = "/webhooks/app/uninstalled"
 
+  [[webhooks.subscriptions]]
+  topics = [ "orders/paid" ]
+  uri = "/webhooks/orders/paid"
+
 [app_proxy]
-url = "https://begin-assign-assignment-miracle.trycloudflare.com/proxy"
+url = "http://localhost:54792/proxy"
 subpath = "referrals"
 prefix = "apps"
 
@@ -31,7 +35,7 @@ prefix = "apps"
 scopes = "write_products,read_customers,write_customers,read_orders,write_script_tags,write_themes"
 
 [auth]
-redirect_urls = ["https://begin-assign-assignment-miracle.trycloudflare.com/auth/callback", "https://begin-assign-assignment-miracle.trycloudflare.com/auth/shopify/callback", "https://begin-assign-assignment-miracle.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["http://localhost:54792/auth/callback", "http://localhost:54792/auth/shopify/callback", "http://localhost:54792/api/auth/callback"]
 
 [pos]
 embedded = false 

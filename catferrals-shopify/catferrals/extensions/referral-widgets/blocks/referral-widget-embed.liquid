@@ -1,8 +1,10 @@
 {% comment %}
   Catferrals Referral Widget Embed
-  App block for embedding referral widget anywhere on the site
+  App block for embedding referral widgets anywhere on the site
   VERSION: 1.0.0
 {% endcomment %}
+
+{% render 'catferrals-config' %}
 
 <div class="catferrals-widget-embed" 
      data-shop="{{ shop.permanent_domain }}"
@@ -43,8 +45,10 @@
         
         <!-- CTA Button -->
         {% if customer %}
-          <a href="http://localhost:55891/portal?shop={{ shop.permanent_domain | url_encode }}&email={{ customer.email | url_encode }}" 
+          <a id="catferrals-portal-link" href="/portal?shop={{ shop.permanent_domain | url_encode }}&email={{ customer.email | url_encode }}" 
              target="_blank"
+             data-shop="{{ shop.permanent_domain }}"
+             data-email="{{ customer.email }}"
              style="background: {{ block.settings.accent_color }}; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 1em;">
             {{ block.settings.cta_text_logged_in }}
           </a>
@@ -60,6 +64,20 @@
     </div>
   </div>
 </div>
+
+<script>
+// ✅ FIXED: Update portal link with dynamic URL
+document.addEventListener('DOMContentLoaded', function() {
+  const portalLink = document.getElementById('catferrals-portal-link');
+  if (portalLink && window.CatferralsConfig) {
+    const shop = portalLink.dataset.shop;
+    const email = portalLink.dataset.email;
+    if (shop && email) {
+      portalLink.href = window.CatferralsConfig.getPortalUrl(shop, email);
+    }
+  }
+});
+</script>
 
 {% schema %}
 {

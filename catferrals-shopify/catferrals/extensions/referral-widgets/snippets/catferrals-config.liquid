@@ -1,0 +1,122 @@
+{% comment %}
+  Catferrals Dynamic URL Configuration
+  Provides dynamic URL generation for all widgets to replace hardcoded URLs
+  VERSION: 2.0.0
+{% endcomment %}
+
+<script>
+(function() {
+  'use strict';
+  
+  // ✅ DYNAMIC URL CONFIGURATION
+  // This replaces all hardcoded localhost:54792  URLs with dynamic detection
+  
+  window.CatferralsConfig = {
+    // Dynamically detect the current server URL
+    getBaseUrl: function() {
+      // ✅ CRITICAL FIX: Always use app server URL, never Shopify store URL
+      // Widgets run on Shopify store but need to communicate with our app server
+      
+      // First, try to get the cached working port
+      const cachedPort = this.detectAppServerPort();
+      if (cachedPort) {
+        return `http://localhost:${cachedPort}`;
+      }
+      
+      // Default to current known working port
+      return `http://localhost:54792`;
+    },
+    
+    // Detect the app server port dynamically
+    detectAppServerPort: function() {
+      // Try to read from localStorage if we've successfully connected before
+      const lastWorkingPort = localStorage.getItem('catferrals-app-port');
+      if (lastWorkingPort) {
+        return parseInt(lastWorkingPort);
+      }
+      
+      // Default to common development port
+      return 54792 ;
+    },
+    
+    // Test connection to app server and cache the working port
+    testAndCacheConnection: function(port, callback) {
+      const testUrl = `http://localhost:${port}/api/referral-dashboard?test=1`;
+      
+      fetch(testUrl, { 
+        method: 'GET',
+        timeout: 2000 
+      })
+      .then(response => {
+        if (response.ok || response.status === 400) { // 400 is OK, means server is running
+          localStorage.setItem('catferrals-app-port', port.toString());
+          console.log(`✅ Catferrals: Connected to app server on port ${port}`);
+          if (callback) callback(port);
+        }
+      })
+      .catch(() => {
+        console.log(`❌ Catferrals: Failed to connect to port ${port}`);
+      });
+    },
+    
+    // Generate API URLs dynamically
+    getApiUrl: function(endpoint) {
+      const baseUrl = this.getBaseUrl();
+      const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+      return `${baseUrl}${normalizedEndpoint}`;
+    },
+    
+    // Generate tracking URLs dynamically
+    getTrackingUrl: function(code) {
+      return this.getApiUrl(`/api/track/${code}`);
+    },
+    
+    // Generate dashboard API URL
+    getDashboardApiUrl: function() {
+      return this.getApiUrl('/api/referral-dashboard');
+    },
+    
+    // Generate portal URL
+    getPortalUrl: function(shop, email) {
+      const baseUrl = this.getBaseUrl();
+      return `${baseUrl}/portal?shop=${encodeURIComponent(shop)}&email=${encodeURIComponent(email)}`;
+    },
+    
+    // Generate verification status URL
+    getVerificationStatusUrl: function(code, token, shop) {
+      const baseUrl = this.getBaseUrl();
+      return `${baseUrl}/proxy/verify?code=${encodeURIComponent(code)}&verify=${encodeURIComponent(token)}&shop=${encodeURIComponent(shop)}`;
+    },
+    
+    // Generate verify referrer URL
+    getVerifyReferrerUrl: function(code, token, shop) {
+      const baseUrl = this.getBaseUrl();
+      return `${baseUrl}/apps/referrals/verify`;
+    },
+    
+    // Generate dashboard URL with parameters
+    getDashboardUrl: function(email, shop) {
+      const baseUrl = this.getBaseUrl();
+      return `${baseUrl}/api/referral-dashboard?email=${encodeURIComponent(email)}&shop=${encodeURIComponent(shop)}`;
+    },
+    
+    // Auto-detect working port on page load
+    autoDetectPort: function() {
+      const commonPorts = [54792 , 54792 , 3000, 3001, 4000, 8000];
+      const self = this;
+      
+      commonPorts.forEach(port => {
+        self.testAndCacheConnection(port);
+      });
+    }
+  };
+  
+  // Initialize port detection
+  window.CatferralsConfig.autoDetectPort();
+  
+  console.log('✅ Catferrals Dynamic URL Config loaded');
+  console.log('📍 Base URL:', window.CatferralsConfig.getBaseUrl());
+  console.log('📍 Dashboard API:', window.CatferralsConfig.getDashboardApiUrl());
+  
+})();
+</script> 

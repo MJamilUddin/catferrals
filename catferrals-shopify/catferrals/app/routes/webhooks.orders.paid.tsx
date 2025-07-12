@@ -4,8 +4,25 @@ import { authenticate } from "../shopify.server";
 import db from "../db.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  console.log("🔍 Webhook received - Starting authentication debug");
+  
+  // Log all headers for debugging
+  const headers: Record<string, string> = {};
+  request.headers.forEach((value, key) => {
+    headers[key] = value;
+  });
+  console.log("📋 Webhook headers:", headers);
+  
+  // Log request method and URL
+  console.log("🌐 Request method:", request.method);
+  console.log("🌐 Request URL:", request.url);
+  
   try {
+    console.log("🔐 Starting Shopify webhook authentication...");
     const { topic, shop, session, admin, payload } = await authenticate.webhook(request);
+    console.log("✅ Authentication successful!");
+    console.log("📦 Topic:", topic);
+    console.log("🏪 Shop:", shop);
 
     if (topic !== "orders/paid") {
       return json({ message: "Webhook topic not supported" }, { status: 200 });
@@ -165,10 +182,28 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       commission: commissionAmount
     }, { status: 200 });
 
-  } catch (error) {
-    console.error("Error processing order webhook:", error);
+  } catch (error: any) {
+    console.error("❌ Webhook processing failed!");
+    console.error("🔍 Error details:", error);
+    console.error("🔍 Error message:", error?.message);
+    console.error("🔍 Error name:", error?.name);
+    console.error("🔍 Error stack:", error?.stack);
+    
+    // Check if this is an authentication error
+    if (error?.message?.includes('authenticate') || error?.message?.includes('HMAC') || error?.message?.includes('webhook')) {
+      console.error("🔐 Authentication-specific error detected");
+      return json({ 
+        error: "Webhook authentication failed",
+        details: error?.message,
+        type: "authentication_error"
+      }, { status: 401 });
+    }
+    
+    // Generic error response
     return json({ 
-      error: "Failed to process webhook" 
+      error: "Failed to process webhook",
+      details: error?.message || "Unknown error",
+      type: "processing_error"
     }, { status: 500 });
   }
 }; 

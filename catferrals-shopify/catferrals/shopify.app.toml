@@ -3,7 +3,8 @@
 client_id = "8676cc7c32cbc78d5a400a0e4d2bffcc"
 name = "catferrals"
 handle = "catferrals"
-application_url = "https://widely-geography-updates-collect.trycloudflare.com"
+# ✅ FIXED: Use actual URL (will be updated automatically by Shopify CLI)
+application_url = "https://chicks-paying-stranger-ladder.trycloudflare.com"
 embedded = true
 
 [build]
@@ -21,12 +22,17 @@ api_version = "2025-04"
   topics = [ "app/uninstalled" ]
   uri = "/webhooks/app/uninstalled"
 
+  [[webhooks.subscriptions]]
+  topics = [ "orders/paid" ]
+  uri = "/webhooks/orders/paid"
+
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "write_products"
 
 [auth]
-redirect_urls = ["https://widely-geography-updates-collect.trycloudflare.com/auth/callback", "https://widely-geography-updates-collect.trycloudflare.com/auth/shopify/callback", "https://widely-geography-updates-collect.trycloudflare.com/api/auth/callback"]
+# ✅ FIXED: Use actual URLs (will be updated automatically by Shopify CLI)
+redirect_urls = ["https://chicks-paying-stranger-ladder.trycloudflare.com/auth/callback", "https://chicks-paying-stranger-ladder.trycloudflare.com/auth/shopify/callback", "https://chicks-paying-stranger-ladder.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

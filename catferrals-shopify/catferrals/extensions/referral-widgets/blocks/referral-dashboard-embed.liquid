@@ -4,6 +4,9 @@
   VERSION: 1.0.0
 {% endcomment %}
 
+{% render 'catferrals-config' %}
+{% render 'global-referral-tracker' %}
+
 <div class="catferrals-dashboard-embed" 
      data-shop="{{ shop.permanent_domain }}"
      data-customer-email="{{ customer.email | default: '' }}"
@@ -62,9 +65,11 @@
     console.log('🔍 Loading embed dashboard for:', email);
     
     const shopDomain = document.querySelector('[data-shop]')?.dataset?.shop || window.location.hostname;
-    const apiUrl = 'http://localhost:55891/api/referral-dashboard';
     
-    fetch(apiUrl + '?email=' + encodeURIComponent(email) + '&shop=' + encodeURIComponent(shopDomain))
+    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+    const apiUrl = window.CatferralsConfig.getDashboardUrl(email, shopDomain);
+    
+    fetch(apiUrl)
       .then(response => response.json())
       .then(result => {
         console.log('🔍 Embed dashboard data:', result);
@@ -120,9 +125,9 @@
         <div style="background: rgba(0,0,0,0.02); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
           <div style="font-size: 0.9em; color: #666; margin-bottom: 8px;">Your Referral Link:</div>
           <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #e0e0e0;">
-            <code style="word-break: break-all; font-family: monospace; font-size: 0.8em;">${data.referralLink || 'http://localhost:55891/api/track/' + data.code}</code>
+            <code style="word-break: break-all; font-family: monospace; font-size: 0.8em;">${data.referralLink || window.CatferralsConfig.getTrackingUrl(data.code)}</code>
           </div>
-          <button onclick="navigator.clipboard.writeText('${data.referralLink || 'http://localhost:55891/api/track/' + data.code}'); this.innerHTML = 'Copied!'; setTimeout(() => this.innerHTML = 'Copy Link', 2000);" 
+          <button onclick="navigator.clipboard.writeText('${data.referralLink || window.CatferralsConfig.getTrackingUrl(data.code)}'); this.innerHTML = 'Copied!'; setTimeout(() => this.innerHTML = 'Copy Link', 2000);" 
                   style="background: ${accentColor}; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9em; width: 100%;">
             Copy Link
           </button>
@@ -130,7 +135,7 @@
         
         <!-- View Full Dashboard -->
         <div style="text-align: center;">
-          <a href="http://localhost:55891/portal?shop=${encodeURIComponent('{{ shop.permanent_domain }}')}&email=${encodeURIComponent('{{ customer.email }}')}" 
+          <a href="${window.CatferralsConfig.getPortalUrl('{{ shop.permanent_domain }}', '{{ customer.email }}')}" 
              target="_blank" 
              style="color: ${accentColor}; text-decoration: none; font-size: 0.9em;">
             View Full Dashboard →

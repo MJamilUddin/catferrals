@@ -1,8 +1,10 @@
 {% comment %}
-  Catferrals Referral Dashboard Page Template
-  A dedicated page template for referrers to view their dashboard
+  Catferrals Referral Dashboard Page
+  Full page referral dashboard
   VERSION: 1.0.0
 {% endcomment %}
+
+{% render 'catferrals-config' %}
 
 <div class="catferrals-dashboard-page" 
      data-shop="{{ shop.permanent_domain }}"
@@ -58,9 +60,11 @@
     console.log('🔍 Loading dashboard for:', email);
     
     const shopDomain = document.querySelector('[data-shop]')?.dataset?.shop || window.location.hostname;
-    const apiUrl = 'http://localhost:55891/api/referral-dashboard';
     
-    fetch(apiUrl + '?email=' + encodeURIComponent(email) + '&shop=' + encodeURIComponent(shopDomain))
+    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+    const apiUrl = window.CatferralsConfig.getDashboardUrl(email, shopDomain);
+    
+    fetch(apiUrl)
       .then(response => response.json())
       .then(result => {
         console.log('🔍 Dashboard data:', result);
@@ -109,9 +113,9 @@
       <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); margin-bottom: 40px;">
         <h2 style="margin: 0 0 16px 0; font-size: 1.5em;">Your Referral Link</h2>
         <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-          <code style="word-break: break-all; font-family: monospace;">${data.referralLink || 'http://localhost:55891/api/track/' + data.code}</code>
+          <code style="word-break: break-all; font-family: monospace;">${data.referralLink || window.CatferralsConfig.getTrackingUrl(data.code)}</code>
         </div>
-        <button onclick="navigator.clipboard.writeText('${data.referralLink || 'http://localhost:55891/api/track/' + data.code}')" 
+        <button onclick="navigator.clipboard.writeText('${data.referralLink || window.CatferralsConfig.getTrackingUrl(data.code)}')" 
                 style="background: #007ace; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600;">
           Copy Link
         </button>

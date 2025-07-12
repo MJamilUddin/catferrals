@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import db from "../db.server";
+import { getTrackingUrl } from "../utils/url-helper";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -70,9 +71,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
     // Get primary referral link (first active referral)
     const primaryReferral = referrals.find(r => r.status !== 'expired') || referrals[0];
+    
+    // ✅ FIXED: Use dynamic URL helper instead of hardcoded localhost:54792 
     const referralLink = primaryReferral?.referralCode ? 
-      `http://localhost:55891/api/track/${primaryReferral.referralCode}` : 
-      `http://localhost:55891/api/track/DEFAULT_CODE`;
+      getTrackingUrl(request, primaryReferral.referralCode) : 
+      getTrackingUrl(request, 'DEFAULT_CODE');
     const referralCode = primaryReferral?.referralCode;
 
     // Recent activity (last 10 conversions)

@@ -1,8 +1,10 @@
 {% comment %}
-  Catferrals Referral Social Share Embed
-  App block for embedding social sharing anywhere on the site
+  Catferrals Social Share Embed
+  Social sharing buttons for referral links
   VERSION: 1.0.0
 {% endcomment %}
+
+{% render 'catferrals-config' %}
 
 <div class="catferrals-social-share-embed" 
      data-shop="{{ shop.permanent_domain }}"
@@ -85,8 +87,8 @@
     if (email) {
       loadReferralLink(email);
     } else {
-      // Use default sharing for non-logged in users
-      referralLink = 'http://localhost:55891/api/track/GUEST';
+      // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+      referralLink = window.CatferralsConfig.getTrackingUrl('GUEST');
       setupShareButtons();
     }
   }
@@ -95,22 +97,24 @@
     console.log('🔍 Loading referral link for:', email);
     
     const shopDomain = document.querySelector('[data-shop]')?.dataset?.shop || window.location.hostname;
-    const apiUrl = 'http://localhost:55891/api/referral-dashboard';
     
-    fetch(apiUrl + '?email=' + encodeURIComponent(email) + '&shop=' + encodeURIComponent(shopDomain))
+    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+    const apiUrl = window.CatferralsConfig.getDashboardUrl(email, shopDomain);
+    
+    fetch(apiUrl)
       .then(response => response.json())
       .then(result => {
         console.log('🔍 Share referral data:', result);
         if (result.success && result.data) {
-          referralLink = result.data.referralLink || ('http://localhost:55891/api/track/' + result.data.code);
+          referralLink = result.data.referralLink || window.CatferralsConfig.getTrackingUrl(result.data.code);
         } else {
-          referralLink = 'http://localhost:55891/api/track/DEFAULT';
+          referralLink = window.CatferralsConfig.getTrackingUrl('DEFAULT');
         }
         setupShareButtons();
       })
       .catch(err => {
         console.error('🔍 Share link load failed:', err);
-        referralLink = 'http://localhost:55891/api/track/DEFAULT';
+        referralLink = window.CatferralsConfig.getTrackingUrl('DEFAULT');
         setupShareButtons();
       });
   }
