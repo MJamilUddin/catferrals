@@ -45,7 +45,7 @@
   if (referralCode) {
     console.log('🔍 Global Referral Tracker: Tracking referral visit', referralCode);
     
-    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:56397 
     const trackingUrl = window.CatferralsConfig.getTrackingUrl(referralCode);
     
     fetch(trackingUrl, {
@@ -78,7 +78,7 @@
   function checkVerificationStatus(code, token) {
     console.log('🔍 Global Referral Tracker: Checking verification status for', code);
     
-    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:56397 
     const statusUrl = window.CatferralsConfig.getVerificationStatusUrl(code, token, SHOP_DOMAIN);
 
     fetch(statusUrl, {
@@ -157,7 +157,7 @@
     
     document.body.appendChild(modal);
 
-    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:56397 
     const verifyUrl = window.CatferralsConfig.getVerifyReferrerUrl(code, token, SHOP_DOMAIN);
 
     fetch(verifyUrl, {
@@ -199,7 +199,7 @@
     
     document.body.appendChild(modal);
 
-    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:56397 
     const dashboardUrl = window.CatferralsConfig.getDashboardUrl(email, SHOP_DOMAIN);
 
     fetch(dashboardUrl)

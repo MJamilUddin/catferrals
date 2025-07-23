@@ -72,7 +72,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     // Get primary referral link (first active referral)
     const primaryReferral = referrals.find(r => r.status !== 'expired') || referrals[0];
     
-    // ✅ FIXED: Use dynamic URL helper instead of hardcoded localhost:54792 
+    // ✅ FIXED: Use dynamic URL helper instead of hardcoded localhost:56397 
     const referralLink = primaryReferral?.referralCode ? 
       getTrackingUrl(request, primaryReferral.referralCode) : 
       getTrackingUrl(request, 'DEFAULT_CODE');

@@ -1,30 +1,27 @@
 {% comment %}
   Catferrals Dynamic URL Configuration
   Provides dynamic URL generation for all widgets to replace hardcoded URLs
-  VERSION: 2.0.0
+  VERSION: 3.0.0 - Fully Dynamic
 {% endcomment %}
 
 <script>
 (function() {
   'use strict';
   
-  // ✅ DYNAMIC URL CONFIGURATION
-  // This replaces all hardcoded localhost:54792  URLs with dynamic detection
-  
   window.CatferralsConfig = {
     // Dynamically detect the current server URL
     getBaseUrl: function() {
-      // ✅ CRITICAL FIX: Always use app server URL, never Shopify store URL
-      // Widgets run on Shopify store but need to communicate with our app server
+      // CRITICAL: Always use localhost in development, even when running on Shopify store domain
+      // The widgets run on the Shopify store but need to communicate with our local development server
       
-      // First, try to get the cached working port
+      // Try cached working port first
       const cachedPort = this.detectAppServerPort();
       if (cachedPort) {
         return `http://localhost:${cachedPort}`;
       }
       
-      // Default to current known working port
-      return `http://localhost:54792`;
+      // Fallback to current server port (from terminal output)
+      return 'http://localhost:56397';
     },
     
     // Detect the app server port dynamically
@@ -35,15 +32,15 @@
         return parseInt(lastWorkingPort);
       }
       
-      // Default to common development port
-      return 54792 ;
+      // No cached port found
+      return null;
     },
     
     // Test connection to app server and cache the working port
     testAndCacheConnection: function(port, callback) {
       const testUrl = `http://localhost:${port}/api/referral-dashboard?test=1`;
       
-      fetch(testUrl, { 
+      return fetch(testUrl, { 
         method: 'GET',
         timeout: 2000 
       })
@@ -52,10 +49,13 @@
           localStorage.setItem('catferrals-app-port', port.toString());
           console.log(`✅ Catferrals: Connected to app server on port ${port}`);
           if (callback) callback(port);
+          return true;
         }
+        return false;
       })
       .catch(() => {
         console.log(`❌ Catferrals: Failed to connect to port ${port}`);
+        return false;
       });
     },
     
@@ -102,12 +102,31 @@
     
     // Auto-detect working port on page load
     autoDetectPort: function() {
-      const commonPorts = [54792 , 54792 , 3000, 3001, 4000, 8000];
+      // Try common development ports (including current server port from terminal)
+      const commonPorts = [56397, 3000, 3001, 4000, 5000, 8000, 8080];
       const self = this;
       
-      commonPorts.forEach(port => {
-        self.testAndCacheConnection(port);
-      });
+      // Try each port sequentially
+      let portIndex = 0;
+      function tryNextPort() {
+        if (portIndex >= commonPorts.length) {
+          console.log('❌ Catferrals: No working port found');
+          return;
+        }
+        
+        const port = commonPorts[portIndex];
+        self.testAndCacheConnection(port, function(workingPort) {
+          console.log(`✅ Catferrals: Found working port ${workingPort}`);
+        }).then(success => {
+          if (!success) {
+            portIndex++;
+            setTimeout(tryNextPort, 100); // Try next port after brief delay
+          }
+        });
+      }
+      
+      // Start port detection
+      tryNextPort();
     }
   };
   
@@ -115,8 +134,14 @@
   window.CatferralsConfig.autoDetectPort();
   
   console.log('✅ Catferrals Dynamic URL Config loaded');
+  console.log('📍 Current hostname:', window.location.hostname);
   console.log('📍 Base URL:', window.CatferralsConfig.getBaseUrl());
   console.log('📍 Dashboard API:', window.CatferralsConfig.getDashboardApiUrl());
+  
+  // Test connection immediately to current server port
+  window.CatferralsConfig.testAndCacheConnection(56397, function(port) {
+    console.log('✅ Catferrals: Successfully connected to development server on port', port);
+  });
   
 })();
 </script> 

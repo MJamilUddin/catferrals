@@ -3,7 +3,7 @@
 client_id = "8676cc7c32cbc78d5a400a0e4d2bffcc"
 name = "catferrals"
 handle = "catferrals"
-application_url = "http://localhost:54792"
+application_url = "http://localhost:56397"
 embedded = true
 
 [build]
@@ -26,7 +26,7 @@ api_version = "2025-04"
   uri = "/webhooks/orders/paid"
 
 [app_proxy]
-url = "http://localhost:54792/proxy"
+url = "http://localhost:56397/proxy"
 subpath = "referrals"
 prefix = "apps"
 
@@ -35,7 +35,7 @@ prefix = "apps"
 scopes = "write_products,read_customers,write_customers,read_orders,write_script_tags,write_themes"
 
 [auth]
-redirect_urls = ["http://localhost:54792/auth/callback", "http://localhost:54792/auth/shopify/callback", "http://localhost:54792/api/auth/callback"]
+redirect_urls = ["http://localhost:56397/auth/callback", "http://localhost:56397/auth/shopify/callback", "http://localhost:56397/api/auth/callback"]
 
 [pos]
 embedded = false 

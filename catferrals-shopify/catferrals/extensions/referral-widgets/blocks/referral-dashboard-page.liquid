@@ -61,7 +61,7 @@
     
     const shopDomain = document.querySelector('[data-shop]')?.dataset?.shop || window.location.hostname;
     
-    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:54792 
+    // ✅ FIXED: Use dynamic URL instead of hardcoded localhost:56397 
     const apiUrl = window.CatferralsConfig.getDashboardUrl(email, shopDomain);
     
     fetch(apiUrl)
