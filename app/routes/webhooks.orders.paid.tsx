@@ -21,7 +21,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   // Check if this is a CLI test webhook (no X-Shopify-Shop-Domain or generic user-agent)
   const isCliTest = !headers['x-shopify-shop-domain'] || 
                    headers['user-agent']?.includes('curl') ||
-                   headers['user-agent']?.includes('node');
+                   headers['user-agent']?.includes('node') ||
+                   headers['x-shopify-shop-domain'] === 'shop.myshopify.com';
   
   if (isCliTest) {
     console.log("🧪 CLI Test Mode: Processing test webhook");
@@ -34,21 +35,53 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     console.log("✅ Authentication successful!");
     console.log("📦 Topic:", topic);
     console.log("🏪 Shop:", shop);
+    console.log("🔍 About to start webhook processing...");
 
-    if (topic !== "orders/paid") {
-      return json({ message: "Webhook topic not supported" }, { status: 200 });
+    try {
+      if (topic !== "orders/paid" && topic !== "ORDERS_PAID") {
+        console.log("❌ Topic not supported:", topic);
+        return json({ message: "Webhook topic not supported" }, { status: 200 });
+      }
+
+      console.log("🔍 Checking if test shop...");
+      // If this is a test shop, use CLI test mode
+      if (shop === 'shop.myshopify.com') {
+        console.log("🧪 Test shop detected, using CLI test mode");
+        return await handleTestWebhook(request);
+      }
+      
+      console.log("🏪 Processing as real shop:", shop);
+      return await processOrderWebhook(payload, shop);
+    } catch (processingError: any) {
+      console.log("❌ Error during webhook processing:");
+      console.log("🔍 Processing error details:", processingError);
+      console.log("🔍 Processing error message:", processingError?.message);
+      throw processingError; // Re-throw to be caught by outer catch
     }
-
-    return await processOrderWebhook(payload, shop);
 
   } catch (error: any) {
     console.log("❌ Webhook processing failed!");
     console.log("🔍 Error details:", error);
-    console.log("🔍 Error message:", error.message);
-    console.log("🔍 Error name:", error.name);
-    console.log("🔍 Error stack:", error.stack);
+    console.log("🔍 Error message:", error?.message);
+    console.log("🔍 Error name:", error?.name);
+    console.log("🔍 Error stack:", error?.stack);
     
-    return json({ error: "Webhook processing failed" }, { status: 400 });
+    // Check if this is an authentication error
+    if (error?.message?.includes('authenticate') || error?.message?.includes('HMAC') || error?.message?.includes('webhook')) {
+      console.log("🔐 Authentication-specific error detected");
+      return json({ 
+        error: "Webhook authentication failed",
+        details: error?.message,
+        type: "authentication_error"
+      }, { status: 401 });
+    }
+    
+    // Generic error response
+    return json({ 
+      error: "Failed to process webhook",
+      details: error?.message || "Unknown error",
+      type: "processing_error"
+    }, { status: 500 });
   }
 };
 
@@ -101,6 +134,13 @@ async function handleTestWebhook(request: Request) {
 
 async function processOrderWebhook(order: any, shop: string) {
   console.log(`Processing order webhook for shop: ${shop}`);
+  console.log(`Order data:`, {
+    orderId: order.id,
+    total: order.total_price,
+    noteAttributes: order.note_attributes,
+    customerEmail: order.customer?.email,
+    rawPayload: JSON.stringify(order, null, 2)
+  });
 
   // Extract order data
   const orderId = order.id.toString();
@@ -112,14 +152,21 @@ async function processOrderWebhook(order: any, shop: string) {
   // Look for referral tracking in order attributes or note attributes
   let referralCode: string | null = null;
   
-  // Check note attributes for referral code
+  // Check note attributes for referral code (including cart attributes that become note_attributes)
   if (order.note_attributes && Array.isArray(order.note_attributes)) {
-    const refAttribute = order.note_attributes.find((attr: any) => 
-      attr.name === "referral_code" || attr.name === "ref"
-    );
+    console.log('Found note_attributes:', order.note_attributes);
+    const refAttribute = order.note_attributes.find((attr: any) => {
+      console.log('Checking attribute:', attr);
+      return attr.name === "_referral_code" || attr.name === "referral_code" || attr.name === "ref";
+    });
     if (refAttribute) {
       referralCode = refAttribute.value;
+      console.log(`Found referral code in order attributes: ${referralCode}`);
+    } else {
+      console.log('No referral code found in note_attributes:', order.note_attributes);
     }
+  } else {
+    console.log('No note_attributes found in order');
   }
 
   // Also check order tags or landing site

@@ -32,6 +32,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     // Extract order data
     const order = payload;
+    console.log(`Order data:`, {
+      orderId: order.id,
+      total: order.total_price,
+      noteAttributes: order.note_attributes,
+      customerEmail: order.customer?.email
+    });
+    
     const orderId = order.id.toString();
     const orderTotal = parseFloat(order.total_price) || 0;
     const customerId = order.customer?.id?.toString();
@@ -41,13 +48,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     // Look for referral tracking in order attributes or note attributes
     let referralCode: string | null = null;
     
-    // Check note attributes for referral code
+    // Check note attributes for referral code (including cart attributes that become note_attributes)
     if (order.note_attributes && Array.isArray(order.note_attributes)) {
       const refAttribute = order.note_attributes.find((attr: any) => 
-        attr.name === "referral_code" || attr.name === "ref"
+        attr.name === "_referral_code" || attr.name === "referral_code" || attr.name === "ref"
       );
       if (refAttribute) {
         referralCode = refAttribute.value;
+        console.log(`Found referral code in note_attributes: ${referralCode}`);
+      } else {
+        console.log('No referral code found in note_attributes:', order.note_attributes);
       }
     }
 
